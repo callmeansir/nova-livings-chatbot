@@ -10,7 +10,9 @@ const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const WHATSAPP = '+447888368461';
 
+// Store full conversation per customer
 const conversations = {};
+const orderData = {};
 
 const IMAGE_MAP = {
   'orlando': 'https://mynewsofaltd.co.uk/cdn/shop/files/11.webp?v=1775221877&width=1080',
@@ -23,7 +25,7 @@ const IMAGE_MAP = {
   'ushape': 'https://mynewsofaltd.co.uk/cdn/shop/files/2_ed3999c5-8567-4bda-9462-f064b490c1b0.jpg?v=1747492788&width=1080',
 };
 
-const SYSTEM_PROMPT = `You are a sales assistant for Comfy Sofa Ltd, a UK furniture business. You reply like a real human — short, friendly, to the point. No bullet points, no long lists, no corporate language.
+const SYSTEM_PROMPT = `You are a sales assistant for Comfy Sofa Ltd, a UK sofa business. You reply like a real human — warm, friendly, short and to the point. No bullet points, no long messages, no corporate language. Think of yourself as a helpful person texting back, not a robot.
 
 PRODUCTS & PRICES:
 - Orlando Electric Recliner 3+2 (LED lights + wireless charger): £899 — Black or Grey
@@ -36,35 +38,42 @@ PRODUCTS & PRICES:
 - U-Shape Sofas: from £799 — Grey, Black, Brown, Cream, Mink
 - Sofa Beds: from £499
 
-DELIVERY: Free UK delivery, 3-7 working days, free assembly included.
+DELIVERY:
+- Free delivery anywhere in the UK
+- 2 to 4 working days
+- Free assembly included
+- If customer asks for an exact day or date: "Yes that's fine, just let us know what works for you"
+- If customer asks about time: "We'll give you a ring the day before delivery to let you know the exact time — our delivery process is very smooth 😊"
 
-PAYMENT: Cash on delivery (COD) only. If customer specifically asks about bank transfer, that's also available.
+PAYMENT: Cash on delivery — you pay when your sofa arrives. If customer asks about bank transfer, that's also available.
 
-PHOTOS: When a customer asks about a specific sofa or wants to see it, include [SEND_IMAGE:orlando] or [SEND_IMAGE:roma] etc. in your reply. Always send a photo when first discussing a specific product.
+PHOTOS: When discussing a specific sofa for the first time, always include [SEND_IMAGE:orlando] or [SEND_IMAGE:roma] etc. to send a photo.
 
-WHATSAPP: ${WHATSAPP} — give this when customer wants to order or has a complex question.
+ORDER TAKING:
+- When customer seems interested or ready, ask: "Would you like to place your order? 😊"
+- If they say yes, reply EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
+- Once they provide their details, confirm: "Perfect, thank you! Your order has been noted. We'll be in touch shortly to confirm your delivery date 👍"
+- If they have questions after ordering, answer them warmly
+
+CONVERSATION MEMORY:
+- Remember what sofa they were asking about throughout the conversation
+- If they said they liked grey earlier, remember that
+- Build rapport naturally — if they mention something personal, acknowledge it
 
 HOW TO REPLY:
-- Keep it under 2-3 sentences max
-- Sound like a real person texting, not a robot
-- No bullet points, no bold text, no long lists
-- Ask one simple question to move the sale forward
-- Never mention any website links
-- If they ask for price, just say the price simply
-- If they want to order, give them the WhatsApp number
+- Max 2-3 sentences
+- Sound human, warm and natural
+- Never use bullet points or bold text in replies
+- Never mention any website
+- One question at a time to move the conversation forward
+- Use the odd emoji to feel natural but don't overdo it
 
-EXAMPLES:
-Customer: "How much is the Orlando?"
-You: "The Orlando is £899 — comes with LED lights and a wireless charger, available in black or grey. Which colour were you thinking? [SEND_IMAGE:orlando]"
-
-Customer: "Do you deliver to Birmingham?"
-You: "Yes we deliver free anywhere in the UK, usually 3-7 days. Assembly included too 👍"
-
-Customer: "How do I pay?"
-You: "We do cash on delivery so you pay when it arrives — no upfront payment needed 😊"
-
-Customer: "I want to order"
-You: "Great! Drop us a message on WhatsApp and we'll sort everything for you — ${WHATSAPP} 👍"`;
+EXAMPLE REPLIES:
+"The Orlando is £899, comes with LED lights and a wireless charger. Available in black or grey — which were you thinking?"
+"We deliver free anywhere in the UK, usually 2-4 days and our team will assemble it for you too 😊"
+"Yes we can arrange a specific day, no problem at all. Which day works best for you?"
+"We'll give you a ring the day before to let you know the exact time — our delivery process is very smooth 😊"
+"Cash on delivery so you only pay when it arrives — no upfront payment needed 👍"`;
 
 app.get('/webhook', (req, res) => {
   if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === VERIFY_TOKEN) {
@@ -92,10 +101,15 @@ async function handleMessage(event) {
   const messageText = event.message?.text;
   if (!messageText) return;
 
+  // Init conversation history for this customer
   if (!conversations[senderId]) conversations[senderId] = [];
+
+  // Add customer message to history
   conversations[senderId].push({ role: 'user', content: messageText });
-  if (conversations[senderId].length > 10) {
-    conversations[senderId] = conversations[senderId].slice(-10);
+
+  // Keep last 20 messages for memory
+  if (conversations[senderId].length > 20) {
+    conversations[senderId] = conversations[senderId].slice(-20);
   }
 
   try {
@@ -103,14 +117,14 @@ async function handleMessage(event) {
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 200,
+      max_tokens: 250,
       system: SYSTEM_PROMPT,
       messages: conversations[senderId]
     });
 
     let reply = response.content[0].text;
 
-    // Send images if triggered
+    // Send images if AI triggered them
     const imageMatches = reply.match(/\[SEND_IMAGE:(\w+)\]/gi);
     if (imageMatches) {
       for (const match of imageMatches) {
@@ -118,18 +132,20 @@ async function handleMessage(event) {
         const url = IMAGE_MAP[type];
         if (url) {
           await sendImage(senderId, url);
-          await new Promise(r => setTimeout(r, 600));
+          await new Promise(r => setTimeout(r, 700));
         }
       }
       reply = reply.replace(/\[SEND_IMAGE:\w+\]/gi, '').trim();
     }
 
+    // Add AI reply to conversation history
     conversations[senderId].push({ role: 'assistant', content: reply });
+
     if (reply) await sendMessage(senderId, reply);
 
   } catch (error) {
     console.error('Error:', error.message);
-    await sendMessage(senderId, `Hey! Sorry about that — message us on WhatsApp and we'll get back to you straight away: ${WHATSAPP} 👍`);
+    await sendMessage(senderId, `Hey sorry about that! Drop us a message on WhatsApp and we'll get back to you right away — ${WHATSAPP} 👍`);
   }
 }
 
