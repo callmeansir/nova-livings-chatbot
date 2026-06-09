@@ -9,88 +9,73 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const WHATSAPP = '+447888368461';
-const GITHUB_IMAGES = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
 
-const conversations = {};
-const customerContext = {};
+// GitHub raw image URLs — spaces encoded as %20
+const G = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
 
 const SOFAS_3_2 = [
-  { id: 1, name: 'Roma Black 3+2 Recliner',    price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.31.jpeg` },
-  { id: 2, name: 'Rio Cord Grey 3+2 Recliner', price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.31 (1).jpeg` },
-  { id: 3, name: 'Sorrento Grey 3+2 Recliner', price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.31 (2).jpeg` },
-  { id: 4, name: 'Roma Brown 3+2 Recliner',    price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.31 (3).jpeg` },
-  { id: 5, name: 'Roma Grey 3+2 Recliner',     price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.32.jpeg` },
+  { id: 1, name: 'Roma Black 3+2 Recliner',    price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31.jpeg` },
+  { id: 2, name: 'Rio Cord Grey 3+2 Recliner', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(1).jpeg` },
+  { id: 3, name: 'Sorrento Grey 3+2 Recliner', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(2).jpeg` },
+  { id: 4, name: 'Roma Brown 3+2 Recliner',    price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(3).jpeg` },
+  { id: 5, name: 'Roma Grey 3+2 Recliner',     price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32.jpeg` },
 ];
 
 const SOFAS_CORNER = [
-  { id: 6,  name: 'Rio Cord Corner Recliner',      price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.32 (1).jpeg` },
-  { id: 7,  name: 'Roma Brown Corner Recliner',    price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.32 (2).jpeg` },
-  { id: 8,  name: 'Roma Black Corner Recliner',    price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.32 (3).jpeg` },
-  { id: 9,  name: 'Roma Grey Corner Recliner',     price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.33.jpeg` },
-  { id: 10, name: 'Sorrento Grey Corner Recliner', price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.33 (1).jpeg` },
+  { id: 6,  name: 'Rio Cord Corner Recliner',      price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(1).jpeg` },
+  { id: 7,  name: 'Roma Brown Corner Recliner',    price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(2).jpeg` },
+  { id: 8,  name: 'Roma Black Corner Recliner',    price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(3).jpeg` },
+  { id: 9,  name: 'Roma Grey Corner Recliner',     price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33.jpeg` },
+  { id: 10, name: 'Sorrento Grey Corner Recliner', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33%20(1).jpeg` },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER];
 
 function buildSystemPrompt(source) {
-  let adContext = '';
-  if (source === 'ad') {
-    adContext = `This customer messaged from your Facebook ad (they said 'Can I make a purchase?' or clicked your ad). Reply with: 'Of course! Here are all our sofas 😊' then use [SHOW_ALL] to send all 10 photos. After photos ask: 'Which one catches your eye?'`;
-  } else {
-    adContext = `This customer sent a direct message. Give a warm welcome and ask what type of sofa they are looking for.`;
-  }
+  let adContext = source === 'ad'
+    ? `Customer came from your Facebook ad or said 'Can I make a purchase?'. Use [SHOW_ALL] immediately — no questions first. After photos say "Which one catches your eye? 😊"`
+    : `Customer sent a direct message. Welcome them warmly and ask what type of sofa they are looking for.`;
 
-  return `You are a sales assistant for Comfy Sofa Ltd, a UK sofa business. Reply like a real human — warm, short, natural. No bullet points, no long messages, no bold text.
+  return `You are a sales assistant for Comfy Sofa Ltd, UK sofa business. Reply like a real human — warm, short, natural. No bullet points, no bold text, max 2-3 sentences.
 
 SOURCE: ${adContext}
 
-FULL PRODUCT LIST:
+PRODUCTS:
+3+2 RECLINER SETS — £550 (manual recliners):
+1. Roma Black 3+2 — black leather
+2. Rio Cord Grey 3+2 — grey cord fabric
+3. Sorrento Grey 3+2 — grey fabric, cup holders
+4. Roma Brown 3+2 — brown leather, cup holders
+5. Roma Grey 3+2 — grey leather, cup holders
 
-3+2 RECLINER SETS — £550 each (manual recliners):
-1. Roma Black 3+2 Recliner — black leather
-2. Rio Cord Grey 3+2 Recliner — grey cord fabric, black leather sides
-3. Sorrento Grey 3+2 Recliner — grey fabric, cup holders
-4. Roma Brown 3+2 Recliner — brown leather, cup holders
-5. Roma Grey 3+2 Recliner — grey leather, cup holders
+CORNER RECLINERS — £580 (manual recliners):
+6. Rio Cord Corner — grey cord fabric
+7. Roma Brown Corner — brown leather, cup holders
+8. Roma Black Corner — black leather, cup holders
+9. Roma Grey Corner — grey leather, cup holders
+10. Sorrento Grey Corner — grey fabric, cup holders
 
-CORNER RECLINERS — £580 each (manual recliners):
-6. Rio Cord Corner Recliner — grey cord fabric, black leather sides
-7. Roma Brown Corner Recliner — brown leather, cup holders
-8. Roma Black Corner Recliner — black leather, cup holders
-9. Roma Grey Corner Recliner — grey leather, cup holders
-10. Sorrento Grey Corner Recliner — grey fabric, cup holders
-
-DELIVERY: Free UK delivery, 2-4 working days, free assembly. We ring day before to confirm exact time. Specific day/date requests — yes that's fine.
-PAYMENT: Cash on delivery only. Bank transfer if customer specifically asks.
+DELIVERY: Free UK, 2-4 working days, free assembly, ring day before for exact time. Specific day/date — yes that's fine.
+PAYMENT: Cash on delivery. Bank transfer if asked.
 WHATSAPP: ${WHATSAPP}
 
-UNDERSTANDING CUSTOMER:
-- "Roma" → ask which colour (Black, Grey or Brown)
-- "Sorrento" → Sorrento Grey — ask 3+2 or corner
-- "Rio" or "Rio Cord" → ask 3+2 or corner
-- Customer says a number → match to product list above
-- "3+2" or "3 and 2" → [SHOW_3_2]
+PHOTO TRIGGERS (use in reply):
+[SHOW_ALL] = sends all 10 photos
+[SHOW_3_2] = sends 5 three+two photos
+[SHOW_CORNER] = sends 5 corner photos
+
+CUSTOMER REQUESTS:
+- "Roma" → ask colour (Black/Grey/Brown)
+- "Sorrento" → ask 3+2 or corner
+- "Rio" → ask 3+2 or corner  
+- number e.g. "number 3" → Sorrento Grey 3+2
 - "corner" → [SHOW_CORNER]
-- "all" → [SHOW_ALL]
-
-PHOTO TRIGGERS:
-[SHOW_3_2] → sends 3+2 photos
-[SHOW_CORNER] → sends corner photos
-[SHOW_ALL] → sends all 10 photos
-
-AFTER PHOTOS: Follow with "Here are our options — which one catches your eye? 😊"
+- "3+2" → [SHOW_3_2]
 
 ORDER FLOW:
-- When customer picks and seems ready → ask: "Would you like to place your order? 😊"
-- If yes → reply EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
-- Once details received → "Perfect, thank you! Your order is confirmed. We'll be in touch to arrange your delivery 👍"
-
-RULES:
-- Max 2-3 sentences
-- Sound like a real person texting
-- Never mention any website
-- One question at a time
-- Natural emoji use`;
+- Ready to buy → ask "Would you like to place your order? 😊"
+- Yes → EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
+- Details received → "Perfect! Your order is confirmed. We'll be in touch to arrange delivery 👍"`;
 }
 
 app.get('/webhook', (req, res) => {
@@ -117,22 +102,19 @@ async function handleMessage(event) {
   const messageText = event.message?.text;
   if (!messageText) return;
 
-  // Detect if message came from a Facebook ad
+  // Detect source on first message
   if (!customerContext[senderId]) {
     const referral = event.referral || event.message?.referral;
-    const hasRef = referral && referral.ref;
-    const isAdMessage = hasRef || (referral && referral.source === 'ADS') || messageText.toLowerCase().includes('can i make a purchase') || messageText.toLowerCase().includes('make a purchase');
-    customerContext[senderId] = isAdMessage ? 'ad' : 'direct';
-    console.log(`Customer ${senderId} — source: ${customerContext[senderId]}`);
+    const fromAd = (referral && (referral.ref || referral.source === 'ADS'))
+      || messageText.toLowerCase().includes('can i make a purchase')
+      || messageText.toLowerCase().includes('make a purchase');
+    customerContext[senderId] = fromAd ? 'ad' : 'direct';
+    console.log(`New customer ${senderId} — source: ${customerContext[senderId]}`);
   }
-
-  const source = customerContext[senderId];
 
   if (!conversations[senderId]) conversations[senderId] = [];
   conversations[senderId].push({ role: 'user', content: messageText });
-  if (conversations[senderId].length > 20) {
-    conversations[senderId] = conversations[senderId].slice(-20);
-  }
+  if (conversations[senderId].length > 20) conversations[senderId] = conversations[senderId].slice(-20);
 
   try {
     await sendTyping(senderId);
@@ -140,40 +122,34 @@ async function handleMessage(event) {
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 300,
-      system: buildSystemPrompt(source),
+      system: buildSystemPrompt(customerContext[senderId]),
       messages: conversations[senderId]
     });
 
     let reply = response.content[0].text;
 
-    // Send 3+2 photos
-    if (reply.includes('[SHOW_3_2]')) {
-      reply = reply.replace('[SHOW_3_2]', '').trim();
-      for (const sofa of SOFAS_3_2) {
-        await sendImage(senderId, sofa.image);
-        await sleep(700);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
-        await sleep(400);
-      }
-    }
-
-    // Send corner photos
-    if (reply.includes('[SHOW_CORNER]')) {
-      reply = reply.replace('[SHOW_CORNER]', '').trim();
-      for (const sofa of SOFAS_CORNER) {
-        await sendImage(senderId, sofa.image);
-        await sleep(700);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
-        await sleep(400);
-      }
-    }
-
-    // Send all 10 photos
+    // Handle photo triggers
     if (reply.includes('[SHOW_ALL]')) {
       reply = reply.replace('[SHOW_ALL]', '').trim();
       for (const sofa of ALL_SOFAS) {
         await sendImage(senderId, sofa.image);
-        await sleep(700);
+        await sleep(800);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sleep(400);
+      }
+    } else if (reply.includes('[SHOW_3_2]')) {
+      reply = reply.replace('[SHOW_3_2]', '').trim();
+      for (const sofa of SOFAS_3_2) {
+        await sendImage(senderId, sofa.image);
+        await sleep(800);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sleep(400);
+      }
+    } else if (reply.includes('[SHOW_CORNER]')) {
+      reply = reply.replace('[SHOW_CORNER]', '').trim();
+      for (const sofa of SOFAS_CORNER) {
+        await sendImage(senderId, sofa.image);
+        await sleep(800);
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
         await sleep(400);
       }
@@ -184,9 +160,12 @@ async function handleMessage(event) {
 
   } catch (error) {
     console.error('Error:', error.message);
-    await sendMessage(senderId, `Hey sorry! Drop us a message on WhatsApp and we'll sort you right away — ${WHATSAPP} 👍`);
+    await sendMessage(senderId, `Hey sorry! Message us on WhatsApp and we'll help straight away — ${WHATSAPP} 👍`);
   }
 }
+
+const customerContext = {};
+const conversations = {};
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
