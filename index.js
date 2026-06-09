@@ -12,76 +12,86 @@ const WHATSAPP = '+447888368461';
 const GITHUB_IMAGES = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
 
 const conversations = {};
+const customerContext = {};
 
-// ── ALL 10 SOFAS WITH EXACT NAMES FROM AD PHOTOS ──
 const SOFAS_3_2 = [
-  { id: 1, name: 'Roma Black 3+2 Recliner',    price: '£550', colour: 'Black', material: 'leather',      image: `${GITHUB_IMAGES}/roma-black-3-2.jpg` },
-  { id: 2, name: 'Rio Cord Grey 3+2 Recliner', price: '£550', colour: 'Grey',  material: 'cord fabric',   image: `${GITHUB_IMAGES}/rio-cord-3-2.jpg` },
-  { id: 3, name: 'Sorrento Grey 3+2 Recliner', price: '£550', colour: 'Grey',  material: 'fabric',        image: `${GITHUB_IMAGES}/sorrento-grey-3-2.jpg` },
-  { id: 4, name: 'Roma Brown 3+2 Recliner',    price: '£550', colour: 'Brown', material: 'leather',       image: `${GITHUB_IMAGES}/roma-brown-3-2.jpg` },
-  { id: 5, name: 'Roma Grey 3+2 Recliner',     price: '£550', colour: 'Grey',  material: 'leather',       image: `${GITHUB_IMAGES}/roma-grey-3-2.jpg` },
+  { id: 1, name: 'Roma Black 3+2 Recliner',    price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.31.jpeg` },
+  { id: 2, name: 'Rio Cord Grey 3+2 Recliner', price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.31 (1).jpeg` },
+  { id: 3, name: 'Sorrento Grey 3+2 Recliner', price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.31 (2).jpeg` },
+  { id: 4, name: 'Roma Brown 3+2 Recliner',    price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.31 (3).jpeg` },
+  { id: 5, name: 'Roma Grey 3+2 Recliner',     price: '£550', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.32.jpeg` },
 ];
 
 const SOFAS_CORNER = [
-  { id: 6, name: 'Rio Cord Corner Recliner',      price: '£580', colour: 'Grey',  material: 'cord fabric', image: `${GITHUB_IMAGES}/rio-cord-corner.jpg` },
-  { id: 7, name: 'Roma Brown Corner Recliner',    price: '£580', colour: 'Brown', material: 'leather',     image: `${GITHUB_IMAGES}/roma-brown-corner.jpg` },
-  { id: 8, name: 'Roma Black Corner Recliner',    price: '£580', colour: 'Black', material: 'leather',     image: `${GITHUB_IMAGES}/roma-black-corner.jpg` },
-  { id: 9, name: 'Roma Grey Corner Recliner',     price: '£580', colour: 'Grey',  material: 'leather',     image: `${GITHUB_IMAGES}/roma-grey-corner.jpg` },
-  { id: 10, name: 'Sorrento Grey Corner Recliner', price: '£580', colour: 'Grey', material: 'fabric',      image: `${GITHUB_IMAGES}/sorrento-grey-corner.jpg` },
+  { id: 6,  name: 'Rio Cord Corner Recliner',      price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.32 (1).jpeg` },
+  { id: 7,  name: 'Roma Brown Corner Recliner',    price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.32 (2).jpeg` },
+  { id: 8,  name: 'Roma Black Corner Recliner',    price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.32 (3).jpeg` },
+  { id: 9,  name: 'Roma Grey Corner Recliner',     price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.33.jpeg` },
+  { id: 10, name: 'Sorrento Grey Corner Recliner', price: '£580', image: `${GITHUB_IMAGES}/WhatsApp Image 2026-06-09 at 20.55.33 (1).jpeg` },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER];
 
-const SYSTEM_PROMPT = `You are a sales assistant for Comfy Sofa Ltd, a UK sofa business. Reply like a real human — warm, short, natural. No bullet points, no long messages, no bold text.
+function buildSystemPrompt(source) {
+  let adContext = '';
+  if (source === 'ad') {
+    adContext = `This customer messaged from your Facebook ad (they said 'Can I make a purchase?' or clicked your ad). Reply with: 'Of course! Here are all our sofas 😊' then use [SHOW_ALL] to send all 10 photos. After photos ask: 'Which one catches your eye?'`;
+  } else {
+    adContext = `This customer sent a direct message. Give a warm welcome and ask what type of sofa they are looking for.`;
+  }
+
+  return `You are a sales assistant for Comfy Sofa Ltd, a UK sofa business. Reply like a real human — warm, short, natural. No bullet points, no long messages, no bold text.
+
+SOURCE: ${adContext}
 
 FULL PRODUCT LIST:
 
-3+2 RECLINER SETS — £550 each (all manual recliners, 3 seater + 2 seater):
+3+2 RECLINER SETS — £550 each (manual recliners):
 1. Roma Black 3+2 Recliner — black leather
-2. Rio Cord Grey 3+2 Recliner — grey cord fabric with black leather sides
-3. Sorrento Grey 3+2 Recliner — grey fabric with cup holders
-4. Roma Brown 3+2 Recliner — brown leather with cup holders
-5. Roma Grey 3+2 Recliner — grey leather with cup holders
+2. Rio Cord Grey 3+2 Recliner — grey cord fabric, black leather sides
+3. Sorrento Grey 3+2 Recliner — grey fabric, cup holders
+4. Roma Brown 3+2 Recliner — brown leather, cup holders
+5. Roma Grey 3+2 Recliner — grey leather, cup holders
 
-CORNER RECLINERS — £580 each (all manual recliners):
-6. Rio Cord Corner Recliner — grey cord fabric with black leather sides
-7. Roma Brown Corner Recliner — brown leather with cup holders
-8. Roma Black Corner Recliner — black leather with cup holders
-9. Roma Grey Corner Recliner — grey leather with cup holders
-10. Sorrento Grey Corner Recliner — grey fabric with cup holders
+CORNER RECLINERS — £580 each (manual recliners):
+6. Rio Cord Corner Recliner — grey cord fabric, black leather sides
+7. Roma Brown Corner Recliner — brown leather, cup holders
+8. Roma Black Corner Recliner — black leather, cup holders
+9. Roma Grey Corner Recliner — grey leather, cup holders
+10. Sorrento Grey Corner Recliner — grey fabric, cup holders
 
-DELIVERY: Free UK delivery, 2-4 working days, free assembly included. We ring day before to confirm exact time. Specific day/date requests — yes that's fine.
-PAYMENT: Cash on delivery only. Bank transfer available if customer specifically asks.
+DELIVERY: Free UK delivery, 2-4 working days, free assembly. We ring day before to confirm exact time. Specific day/date requests — yes that's fine.
+PAYMENT: Cash on delivery only. Bank transfer if customer specifically asks.
 WHATSAPP: ${WHATSAPP}
 
-UNDERSTANDING CUSTOMER REQUESTS:
-- If customer says "Roma" → could be Roma Black, Roma Grey or Roma Brown — ask which colour
-- If customer says "Sorrento" → Sorrento Grey (3+2 or corner — ask which)
-- If customer says "Rio" or "Rio Cord" → Rio Cord (3+2 or corner — ask which)
-- If customer says "3+2" or "3 and 2" → show [SHOW_3_2]
-- If customer says "corner" → show [SHOW_CORNER]
-- If customer mentions a colour like "grey" → show relevant grey options
-- If customer says a number like "number 3" → that's Sorrento Grey 3+2
+UNDERSTANDING CUSTOMER:
+- "Roma" → ask which colour (Black, Grey or Brown)
+- "Sorrento" → Sorrento Grey — ask 3+2 or corner
+- "Rio" or "Rio Cord" → ask 3+2 or corner
+- Customer says a number → match to product list above
+- "3+2" or "3 and 2" → [SHOW_3_2]
+- "corner" → [SHOW_CORNER]
+- "all" → [SHOW_ALL]
 
-PHOTO TRIGGERS — use these in your reply:
-- [SHOW_3_2] → sends all 5 three+two recliner photos with names
-- [SHOW_CORNER] → sends all 5 corner recliner photos with names
-- [SHOW_ALL] → sends all 10 photos
+PHOTO TRIGGERS:
+[SHOW_3_2] → sends 3+2 photos
+[SHOW_CORNER] → sends corner photos
+[SHOW_ALL] → sends all 10 photos
 
-AFTER SENDING PHOTOS:
-Always follow up with: "Here are our options — which one do you like? 😊"
+AFTER PHOTOS: Follow with "Here are our options — which one catches your eye? 😊"
 
 ORDER FLOW:
-- When customer picks a sofa and seems ready → ask: "Would you like to place your order? 😊"
+- When customer picks and seems ready → ask: "Would you like to place your order? 😊"
 - If yes → reply EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
-- Once they give details → say: "Perfect, thank you! Your order is confirmed. We'll be in touch to arrange your delivery date 👍"
+- Once details received → "Perfect, thank you! Your order is confirmed. We'll be in touch to arrange your delivery 👍"
 
 RULES:
-- Max 2-3 sentences per reply
+- Max 2-3 sentences
 - Sound like a real person texting
 - Never mention any website
 - One question at a time
-- Use occasional emoji but keep it natural`;
+- Natural emoji use`;
+}
 
 app.get('/webhook', (req, res) => {
   if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === VERIFY_TOKEN) {
@@ -107,6 +117,17 @@ async function handleMessage(event) {
   const messageText = event.message?.text;
   if (!messageText) return;
 
+  // Detect if message came from a Facebook ad
+  if (!customerContext[senderId]) {
+    const referral = event.referral || event.message?.referral;
+    const hasRef = referral && referral.ref;
+    const isAdMessage = hasRef || (referral && referral.source === 'ADS') || messageText.toLowerCase().includes('can i make a purchase') || messageText.toLowerCase().includes('make a purchase');
+    customerContext[senderId] = isAdMessage ? 'ad' : 'direct';
+    console.log(`Customer ${senderId} — source: ${customerContext[senderId]}`);
+  }
+
+  const source = customerContext[senderId];
+
   if (!conversations[senderId]) conversations[senderId] = [];
   conversations[senderId].push({ role: 'user', content: messageText });
   if (conversations[senderId].length > 20) {
@@ -119,7 +140,7 @@ async function handleMessage(event) {
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 300,
-      system: SYSTEM_PROMPT,
+      system: buildSystemPrompt(source),
       messages: conversations[senderId]
     });
 
@@ -132,7 +153,7 @@ async function handleMessage(event) {
         await sendImage(senderId, sofa.image);
         await sleep(700);
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
-        await sleep(500);
+        await sleep(400);
       }
     }
 
@@ -143,18 +164,18 @@ async function handleMessage(event) {
         await sendImage(senderId, sofa.image);
         await sleep(700);
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
-        await sleep(500);
+        await sleep(400);
       }
     }
 
-    // Send all photos
+    // Send all 10 photos
     if (reply.includes('[SHOW_ALL]')) {
       reply = reply.replace('[SHOW_ALL]', '').trim();
       for (const sofa of ALL_SOFAS) {
         await sendImage(senderId, sofa.image);
         await sleep(700);
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
-        await sleep(500);
+        await sleep(400);
       }
     }
 
