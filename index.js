@@ -8,98 +8,90 @@ app.use(express.json());
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const WHATSAPP = '+447888368461';
 
 const conversations = {};
 
 // ── PRODUCT CATALOGUE WITH IMAGES ──
 const PRODUCTS = {
   recliners: [
-    { name: 'Nova Electric Recliner Leather Corner Sofa', price: '£749', colours: ['Grey'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/Nova_Leather_Corner_Sofa.webp', url: 'https://mynewsofaltd.co.uk/products/nova-electric-recliner-real-leather-corner-sofa' },
-    { name: 'MNS Leather Corner Sofa (230x230cm)', price: '£579', colours: ['Grey', 'Black', 'Brown'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/MNS_Leather_Corner_sofa.webp', url: 'https://mynewsofaltd.co.uk/products/roma-leather-recliner-corner-sofa' },
-    { name: 'Sara Leather Electric Recliner Corner Sofa', price: '£749', colours: ['Grey'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/Gemini_Generated_Image_sawjb7sawjb7sawj.webp', url: 'https://mynewsofaltd.co.uk/products/sara-real-leather-electric-recliner-corner-sofa' },
-    { name: 'Orlando Electric Recliner 3+2 Seater LED & Wireless Charger', price: '£899', colours: ['Black', 'Grey'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/11.webp', url: 'https://mynewsofaltd.co.uk/products/orlando-electric-recliners' },
-    { name: 'Roma Fabric Recliner 3+2 Seater with Cup Holders', price: '£699', colours: ['Grey', 'Black', 'Brown'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/19_de87cfc0-3c3d-459b-98a6-e6739ec17854.jpg', url: 'https://mynewsofaltd.co.uk/collections/fabric-reclines' },
+    { name: 'Nova Electric Recliner Leather Corner Sofa', price: '£749', colours: ['Grey'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/Nova_Leather_Corner_Sofa.webp?v=1772291792&width=1080' },
+    { name: 'MNS Leather Corner Sofa (230x230cm)', price: '£579', colours: ['Grey', 'Black', 'Brown'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/MNS_Leather_Corner_sofa.webp?v=1773065268&width=1080' },
+    { name: 'Sara Leather Electric Recliner Corner Sofa', price: '£749', colours: ['Grey'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/sara.jpg?v=1771943786&width=1080' },
+    { name: 'Orlando Electric Recliner 3+2 LED & Wireless Charger', price: '£899', colours: ['Black', 'Grey'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/11.webp?v=1775221877&width=1080' },
+    { name: 'Roma Fabric Recliner 3+2 with Cup Holders', price: '£699', colours: ['Grey', 'Black', 'Brown'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/19_de87cfc0-3c3d-459b-98a6-e6739ec17854.jpg?v=1771944881&width=1080' },
   ],
   corner: [
-    { name: 'Dino Large Corner Sofa Jumbo Cord', price: '£599', colours: ['Beige', 'Brown'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/Right.jpg', url: 'https://mynewsofaltd.co.uk/collections/corner-sofa' },
-    { name: 'MNS Corner Sofa Collection', price: 'From £399', colours: ['Grey', 'Black', 'Brown', 'Cream', 'Mink', 'Beige', 'Platinum Grey'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/Web.webp', url: 'https://mynewsofaltd.co.uk/collections/corner-sofa' },
+    { name: 'Corner Sofa Collection', price: 'From £399', colours: ['Grey', 'Black', 'Brown', 'Cream', 'Mink', 'Beige', 'Platinum Grey'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/Right.jpg?v=1732558652&width=1080' },
   ],
   chesterfield: [
-    { name: 'Chesterfield Sofa Collection', price: 'From £499', colours: ['Grey', 'Black', 'Brown', 'Cream'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/Web.webp', url: 'https://mynewsofaltd.co.uk/collections/chesterfield-sofas' },
+    { name: 'Chesterfield Sofa Collection', price: 'From £499', colours: ['Grey', 'Black', 'Brown', 'Cream'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/2_ed3999c5-8567-4bda-9462-f064b490c1b0.jpg?v=1747492788&width=1080' },
   ],
   ushape: [
-    { name: 'U-Shape Sofa Collection', price: 'From £799', colours: ['Grey', 'Black', 'Brown', 'Cream', 'Mink'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/Web.webp', url: 'https://mynewsofaltd.co.uk/collections/u-shape' },
+    { name: 'U-Shape Sofa Collection', price: 'From £799', colours: ['Grey', 'Black', 'Brown', 'Cream', 'Mink'], image: 'https://mynewsofaltd.co.uk/cdn/shop/files/2_ed3999c5-8567-4bda-9462-f064b490c1b0.jpg?v=1747492788&width=1080' },
   ]
 };
 
 // ── AD-SPECIFIC CONTEXTS ──
 const AD_CONTEXTS = {
-  'recliner': `The customer clicked on a RECLINER SOFA ad. Focus on our recliner range. Lead with the Orlando (£899, LED lights, wireless charger) and Roma Fabric Recliner (£699). Ask if they want electric or manual recliner, and what colour.`,
-  'corner': `The customer clicked on a CORNER SOFA ad. Focus on our corner sofa range starting from £399. Ask what size they need and what colour. Mention we have 83 corner sofas in stock.`,
-  'chesterfield': `The customer clicked on a CHESTERFIELD SOFA ad. Focus on our Chesterfield collection from £499. Ask about colour preference and size.`,
-  'ushape': `The customer clicked on a U-SHAPE SOFA ad. Focus on our U-shape sofas from £799. Ask about their room size and colour preference.`,
-  'general': `The customer messaged from a general ad or directly. Give them a warm welcome and ask what type of sofa they are looking for.`
+  'recliner': 'The customer clicked on a RECLINER SOFA ad. Focus on recliners. Lead with Orlando (£899, LED + wireless charger) and Roma (£699). Ask electric or manual, and colour.',
+  'corner': 'The customer clicked on a CORNER SOFA ad. Focus on corner sofas from £399. Ask size and colour. We have 83 in stock.',
+  'chesterfield': 'The customer clicked on a CHESTERFIELD ad. Focus on Chesterfields from £499. Ask colour and size.',
+  'ushape': 'The customer clicked on a U-SHAPE ad. Focus on U-shapes from £799. Ask room size and colour.',
+  'general': 'Customer messaged directly. Give warm welcome and ask what sofa they are looking for.'
 };
 
-// ── SYSTEM PROMPT ──
 function buildSystemPrompt(adContext) {
   const context = AD_CONTEXTS[adContext] || AD_CONTEXTS['general'];
-  return `You are a friendly and helpful sales assistant for Comfy Sofa Ltd, a UK furniture business. You sell sofas from the My New Sofa (MNS) range.
+  return `You are a friendly sales assistant for Comfy Sofa Ltd, UK furniture business.
 
 AD CONTEXT: ${context}
 
-FULL PRODUCT RANGE:
-RECLINER SOFAS:
-- Nova Electric Recliner Leather Corner Sofa: £749 | Colours: Grey | Electric recliner
-- MNS Leather Corner Sofa (230x230cm): £579 | Colours: Grey, Black, Brown | Manual recliner
-- Sara Leather Electric Recliner Corner Sofa: £749 | Colours: Grey | Electric recliner
-- Orlando Electric Recliner 3+2 Seater: £899 | Colours: Black, Grey | LED lights + wireless charger
-- Roma Fabric Recliner 3+2 with Cup Holders: £699 | Colours: Grey, Black, Brown | Manual recliner
+PRODUCTS:
+RECLINERS:
+- Nova Electric Recliner Leather Corner: £749 | Grey
+- MNS Leather Corner Sofa 230x230cm: £579 | Grey, Black, Brown
+- Sara Leather Electric Recliner Corner: £749 | Grey
+- Orlando Electric Recliner 3+2 LED+Wireless Charger: £899 | Black, Grey
+- Roma Fabric Recliner 3+2 Cup Holders: £699 | Grey, Black, Brown
 
-CORNER SOFAS:
-- Large range from £399 | 83 items in stock
-- Colours: Grey, Black, Brown, Cream, Mink, Beige, Platinum Grey
+CORNER SOFAS: From £399 | 83 items | Grey, Black, Brown, Cream, Mink, Beige, Platinum Grey
+CHESTERFIELDS: From £499 | 12 items | Grey, Black, Brown, Cream
+U-SHAPE: From £799 | 7 items | Grey, Black, Brown, Cream, Mink
+SOFA BEDS: From £499 | 7 items
 
-CHESTERFIELD SOFAS:
-- From £499 | 12 items in stock
-- Colours: Grey, Black, Brown, Cream
-
-U-SHAPE SOFAS:
-- From £799 | 7 items in stock
-- Colours: Grey, Black, Brown, Cream, Mink
-
-SOFA BEDS:
-- From £499 | 7 items in stock
-
-DELIVERY:
-- Free delivery across all UK mainland
-- 3-7 working days standard delivery
-- Free assembly/setup included
-
-PAYMENT OPTIONS:
-- Pay in full — all major cards, PayPal, Apple Pay, Google Pay, Klarna
-- Cash on Delivery (COD) available — text WhatsApp first
-- Buy Now Pay Later with Klarna
-
-COLOURS AVAILABLE:
-Black, Grey, Brown, Cream, Beige, Mink, Platinum Grey
-
+DELIVERY: Free UK mainland, 3-7 working days, free assembly
+PAYMENT: Full payment, Klarna BNPL, COD available, all major cards + PayPal + Apple Pay
+WHATSAPP: ${WHATSAPP}
 WEBSITE: https://mynewsofaltd.co.uk
-WHATSAPP: 07700 000000 (replace with real number)
 
-PHOTO FEATURE:
-- If customer asks to see a sofa, or asks "can I see it?" — reply with: [SEND_IMAGE:recliner] or [SEND_IMAGE:corner] or [SEND_IMAGE:chesterfield]
-- This will trigger an automatic photo to be sent
+PHOTO INSTRUCTIONS:
+- When customer asks about a specific product OR asks to see a photo, include [SEND_IMAGE:TYPE] in your reply
+- Use [SEND_IMAGE:orlando] for Orlando, [SEND_IMAGE:roma] for Roma, [SEND_IMAGE:nova] for Nova, [SEND_IMAGE:sara] for Sara, [SEND_IMAGE:mns] for MNS Leather Corner, [SEND_IMAGE:corner] for corner sofas, [SEND_IMAGE:chesterfield] for chesterfields, [SEND_IMAGE:ushape] for u-shape
+- ALWAYS send an image when talking about a specific product for the first time
 
 RULES:
-- Be friendly, warm, and helpful — like a real sales person
-- Keep replies concise — under 150 words
-- Always try to qualify the customer (what type, what colour, what size)
-- If they want to buy or need more help, give them the WhatsApp number
-- Never make up prices not listed above
-- Always end with a question or next step
-- Use UK English`;
+- Be friendly and warm
+- Keep replies under 120 words
+- Always qualify customer (type, colour, size)
+- For buying/complex queries give WhatsApp: ${WHATSAPP}
+- Never invent prices
+- Use UK English
+- Always end with a question`;
 }
+
+// ── IMAGE MAP ──
+const IMAGE_MAP = {
+  'orlando': 'https://mynewsofaltd.co.uk/cdn/shop/files/11.webp?v=1775221877&width=1080',
+  'roma': 'https://mynewsofaltd.co.uk/cdn/shop/files/19_de87cfc0-3c3d-459b-98a6-e6739ec17854.jpg?v=1771944881&width=1080',
+  'nova': 'https://mynewsofaltd.co.uk/cdn/shop/files/Nova_Leather_Corner_Sofa.webp?v=1772291792&width=1080',
+  'sara': 'https://mynewsofaltd.co.uk/cdn/shop/files/sara.jpg?v=1771943786&width=1080',
+  'mns': 'https://mynewsofaltd.co.uk/cdn/shop/files/MNS_Leather_Corner_sofa.webp?v=1773065268&width=1080',
+  'corner': 'https://mynewsofaltd.co.uk/cdn/shop/files/Right.jpg?v=1732558652&width=1080',
+  'chesterfield': 'https://mynewsofaltd.co.uk/cdn/shop/files/2_ed3999c5-8567-4bda-9462-f064b490c1b0.jpg?v=1747492788&width=1080',
+  'ushape': 'https://mynewsofaltd.co.uk/cdn/shop/files/2_ed3999c5-8567-4bda-9462-f064b490c1b0.jpg?v=1747492788&width=1080',
+  'recliner': 'https://mynewsofaltd.co.uk/cdn/shop/files/11.webp?v=1775221877&width=1080',
+};
 
 // ── WEBHOOK VERIFICATION ──
 app.get('/webhook', (req, res) => {
@@ -129,7 +121,6 @@ async function handleMessage(event) {
   const messageText = event.message?.text;
   if (!messageText) return;
 
-  // Detect ad context from ref parameter
   const ref = event.message?.referral?.ref || conversations[senderId]?.adContext || 'general';
   const adContext = detectAdContext(ref, messageText);
 
@@ -146,33 +137,35 @@ async function handleMessage(event) {
     await sendTyping(senderId);
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 300,
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 400,
       system: buildSystemPrompt(adContext),
       messages: conversations[senderId].history
     });
 
     let reply = response.content[0].text;
 
-    // Check if AI wants to send an image
-    const imageMatch = reply.match(/\[SEND_IMAGE:(\w+)\]/);
+    // Extract and send image if requested
+    const imageMatch = reply.match(/\[SEND_IMAGE:(\w+)\]/gi);
     if (imageMatch) {
-      const imageType = imageMatch[1];
-      reply = reply.replace(/\[SEND_IMAGE:\w+\]/, '').trim();
-      
-      // Send image first
-      const product = PRODUCTS[imageType]?.[0];
-      if (product) {
-        await sendImage(senderId, product.image, product.name);
+      for (const match of imageMatch) {
+        const imageType = match.replace('[SEND_IMAGE:', '').replace(']', '').toLowerCase();
+        const imageUrl = IMAGE_MAP[imageType];
+        if (imageUrl) {
+          await sendImage(senderId, imageUrl);
+          await new Promise(r => setTimeout(r, 500));
+        }
       }
+      reply = reply.replace(/\[SEND_IMAGE:\w+\]/gi, '').trim();
     }
 
     conversations[senderId].history.push({ role: 'assistant', content: reply });
-    await sendMessage(senderId, reply);
+
+    if (reply) await sendMessage(senderId, reply);
 
   } catch (error) {
-    console.error('Error:', error);
-    await sendMessage(senderId, 'Hi! Thanks for your message 😊 For the fastest response, please WhatsApp us directly and our team will help you right away!');
+    console.error('Error:', error.message);
+    await sendMessage(senderId, `Hi! Thanks for getting in touch 😊 For the fastest help, WhatsApp us directly on ${WHATSAPP} and our team will assist you right away!`);
   }
 }
 
@@ -186,25 +179,29 @@ function detectAdContext(ref, message) {
 }
 
 async function sendMessage(recipientId, text) {
-  await axios.post(`https://graph.facebook.com/v18.0/me/messages`,
-    { recipient: { id: recipientId }, message: { text } },
-    { params: { access_token: PAGE_ACCESS_TOKEN } }
-  );
+  try {
+    await axios.post(`https://graph.facebook.com/v18.0/me/messages`,
+      { recipient: { id: recipientId }, message: { text } },
+      { params: { access_token: PAGE_ACCESS_TOKEN } }
+    );
+  } catch (e) { console.error('sendMessage error:', e.message); }
 }
 
-async function sendImage(recipientId, imageUrl, caption) {
-  await axios.post(`https://graph.facebook.com/v18.0/me/messages`,
-    {
-      recipient: { id: recipientId },
-      message: {
-        attachment: {
-          type: 'image',
-          payload: { url: imageUrl, is_reusable: true }
+async function sendImage(recipientId, imageUrl) {
+  try {
+    await axios.post(`https://graph.facebook.com/v18.0/me/messages`,
+      {
+        recipient: { id: recipientId },
+        message: {
+          attachment: {
+            type: 'image',
+            payload: { url: imageUrl, is_reusable: true }
+          }
         }
-      }
-    },
-    { params: { access_token: PAGE_ACCESS_TOKEN } }
-  );
+      },
+      { params: { access_token: PAGE_ACCESS_TOKEN } }
+    );
+  } catch (e) { console.error('sendImage error:', e.message); }
 }
 
 async function sendTyping(recipientId) {
