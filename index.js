@@ -9,78 +9,84 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const WHATSAPP = '+447888368461';
+const GITHUB_IMAGES = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
 
-// Store full conversation per customer
 const conversations = {};
-const orderData = {};
 
-const IMAGE_MAP = {
-  'orlando': 'https://mynewsofaltd.co.uk/cdn/shop/files/11.webp?v=1775221877&width=1080',
-  'roma': 'https://mynewsofaltd.co.uk/cdn/shop/files/19_de87cfc0-3c3d-459b-98a6-e6739ec17854.jpg?v=1771944881&width=1080',
-  'nova': 'https://mynewsofaltd.co.uk/cdn/shop/files/Nova_Leather_Corner_Sofa.webp?v=1772291792&width=1080',
-  'sara': 'https://mynewsofaltd.co.uk/cdn/shop/files/sara.jpg?v=1771943786&width=1080',
-  'mns': 'https://mynewsofaltd.co.uk/cdn/shop/files/MNS_Leather_Corner_sofa.webp?v=1773065268&width=1080',
-  'corner': 'https://mynewsofaltd.co.uk/cdn/shop/files/Right.jpg?v=1732558652&width=1080',
-  'chesterfield': 'https://mynewsofaltd.co.uk/cdn/shop/files/2_ed3999c5-8567-4bda-9462-f064b490c1b0.jpg?v=1747492788&width=1080',
-  'ushape': 'https://mynewsofaltd.co.uk/cdn/shop/files/2_ed3999c5-8567-4bda-9462-f064b490c1b0.jpg?v=1747492788&width=1080',
-};
+// ── ALL 10 SOFAS WITH EXACT NAMES FROM AD PHOTOS ──
+const SOFAS_3_2 = [
+  { id: 1, name: 'Roma Black 3+2 Recliner',    price: '£550', colour: 'Black', material: 'leather',      image: `${GITHUB_IMAGES}/roma-black-3-2.jpg` },
+  { id: 2, name: 'Rio Cord Grey 3+2 Recliner', price: '£550', colour: 'Grey',  material: 'cord fabric',   image: `${GITHUB_IMAGES}/rio-cord-3-2.jpg` },
+  { id: 3, name: 'Sorrento Grey 3+2 Recliner', price: '£550', colour: 'Grey',  material: 'fabric',        image: `${GITHUB_IMAGES}/sorrento-grey-3-2.jpg` },
+  { id: 4, name: 'Roma Brown 3+2 Recliner',    price: '£550', colour: 'Brown', material: 'leather',       image: `${GITHUB_IMAGES}/roma-brown-3-2.jpg` },
+  { id: 5, name: 'Roma Grey 3+2 Recliner',     price: '£550', colour: 'Grey',  material: 'leather',       image: `${GITHUB_IMAGES}/roma-grey-3-2.jpg` },
+];
 
-const SYSTEM_PROMPT = `You are a sales assistant for Comfy Sofa Ltd, a UK sofa business. You reply like a real human — warm, friendly, short and to the point. No bullet points, no long messages, no corporate language. Think of yourself as a helpful person texting back, not a robot.
+const SOFAS_CORNER = [
+  { id: 6, name: 'Rio Cord Corner Recliner',      price: '£580', colour: 'Grey',  material: 'cord fabric', image: `${GITHUB_IMAGES}/rio-cord-corner.jpg` },
+  { id: 7, name: 'Roma Brown Corner Recliner',    price: '£580', colour: 'Brown', material: 'leather',     image: `${GITHUB_IMAGES}/roma-brown-corner.jpg` },
+  { id: 8, name: 'Roma Black Corner Recliner',    price: '£580', colour: 'Black', material: 'leather',     image: `${GITHUB_IMAGES}/roma-black-corner.jpg` },
+  { id: 9, name: 'Roma Grey Corner Recliner',     price: '£580', colour: 'Grey',  material: 'leather',     image: `${GITHUB_IMAGES}/roma-grey-corner.jpg` },
+  { id: 10, name: 'Sorrento Grey Corner Recliner', price: '£580', colour: 'Grey', material: 'fabric',      image: `${GITHUB_IMAGES}/sorrento-grey-corner.jpg` },
+];
 
-PRODUCTS & PRICES:
-- Orlando Electric Recliner 3+2 (LED lights + wireless charger): £899 — Black or Grey
-- Nova Electric Recliner Leather Corner: £749 — Grey
-- Sara Leather Electric Recliner Corner: £749 — Grey
-- Roma Fabric Recliner 3+2 (cup holders): £699 — Grey, Black, Brown
-- MNS Leather Corner Sofa 230x230cm: £579 — Grey, Black, Brown
-- Corner Sofas: from £399 — Grey, Black, Brown, Cream, Mink, Beige, Platinum Grey
-- Chesterfield Sofas: from £499 — Grey, Black, Brown, Cream
-- U-Shape Sofas: from £799 — Grey, Black, Brown, Cream, Mink
-- Sofa Beds: from £499
+const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER];
 
-DELIVERY:
-- Free delivery anywhere in the UK
-- 2 to 4 working days
-- Free assembly included
-- If customer asks for an exact day or date: "Yes that's fine, just let us know what works for you"
-- If customer asks about time: "We'll give you a ring the day before delivery to let you know the exact time — our delivery process is very smooth 😊"
+const SYSTEM_PROMPT = `You are a sales assistant for Comfy Sofa Ltd, a UK sofa business. Reply like a real human — warm, short, natural. No bullet points, no long messages, no bold text.
 
-PAYMENT: Cash on delivery — you pay when your sofa arrives. If customer asks about bank transfer, that's also available.
+FULL PRODUCT LIST:
 
-PHOTOS: When discussing a specific sofa for the first time, always include [SEND_IMAGE:orlando] or [SEND_IMAGE:roma] etc. to send a photo.
+3+2 RECLINER SETS — £550 each (all manual recliners, 3 seater + 2 seater):
+1. Roma Black 3+2 Recliner — black leather
+2. Rio Cord Grey 3+2 Recliner — grey cord fabric with black leather sides
+3. Sorrento Grey 3+2 Recliner — grey fabric with cup holders
+4. Roma Brown 3+2 Recliner — brown leather with cup holders
+5. Roma Grey 3+2 Recliner — grey leather with cup holders
 
-ORDER TAKING:
-- When customer seems interested or ready, ask: "Would you like to place your order? 😊"
-- If they say yes, reply EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
-- Once they provide their details, confirm: "Perfect, thank you! Your order has been noted. We'll be in touch shortly to confirm your delivery date 👍"
-- If they have questions after ordering, answer them warmly
+CORNER RECLINERS — £580 each (all manual recliners):
+6. Rio Cord Corner Recliner — grey cord fabric with black leather sides
+7. Roma Brown Corner Recliner — brown leather with cup holders
+8. Roma Black Corner Recliner — black leather with cup holders
+9. Roma Grey Corner Recliner — grey leather with cup holders
+10. Sorrento Grey Corner Recliner — grey fabric with cup holders
 
-CONVERSATION MEMORY:
-- Remember what sofa they were asking about throughout the conversation
-- If they said they liked grey earlier, remember that
-- Build rapport naturally — if they mention something personal, acknowledge it
+DELIVERY: Free UK delivery, 2-4 working days, free assembly included. We ring day before to confirm exact time. Specific day/date requests — yes that's fine.
+PAYMENT: Cash on delivery only. Bank transfer available if customer specifically asks.
+WHATSAPP: ${WHATSAPP}
 
-HOW TO REPLY:
-- Max 2-3 sentences
-- Sound human, warm and natural
-- Never use bullet points or bold text in replies
+UNDERSTANDING CUSTOMER REQUESTS:
+- If customer says "Roma" → could be Roma Black, Roma Grey or Roma Brown — ask which colour
+- If customer says "Sorrento" → Sorrento Grey (3+2 or corner — ask which)
+- If customer says "Rio" or "Rio Cord" → Rio Cord (3+2 or corner — ask which)
+- If customer says "3+2" or "3 and 2" → show [SHOW_3_2]
+- If customer says "corner" → show [SHOW_CORNER]
+- If customer mentions a colour like "grey" → show relevant grey options
+- If customer says a number like "number 3" → that's Sorrento Grey 3+2
+
+PHOTO TRIGGERS — use these in your reply:
+- [SHOW_3_2] → sends all 5 three+two recliner photos with names
+- [SHOW_CORNER] → sends all 5 corner recliner photos with names
+- [SHOW_ALL] → sends all 10 photos
+
+AFTER SENDING PHOTOS:
+Always follow up with: "Here are our options — which one do you like? 😊"
+
+ORDER FLOW:
+- When customer picks a sofa and seems ready → ask: "Would you like to place your order? 😊"
+- If yes → reply EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
+- Once they give details → say: "Perfect, thank you! Your order is confirmed. We'll be in touch to arrange your delivery date 👍"
+
+RULES:
+- Max 2-3 sentences per reply
+- Sound like a real person texting
 - Never mention any website
-- One question at a time to move the conversation forward
-- Use the odd emoji to feel natural but don't overdo it
-
-EXAMPLE REPLIES:
-"The Orlando is £899, comes with LED lights and a wireless charger. Available in black or grey — which were you thinking?"
-"We deliver free anywhere in the UK, usually 2-4 days and our team will assemble it for you too 😊"
-"Yes we can arrange a specific day, no problem at all. Which day works best for you?"
-"We'll give you a ring the day before to let you know the exact time — our delivery process is very smooth 😊"
-"Cash on delivery so you only pay when it arrives — no upfront payment needed 👍"`;
+- One question at a time
+- Use occasional emoji but keep it natural`;
 
 app.get('/webhook', (req, res) => {
   if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === VERIFY_TOKEN) {
     res.status(200).send(req.query['hub.challenge']);
-  } else {
-    res.sendStatus(403);
-  }
+  } else { res.sendStatus(403); }
 });
 
 app.post('/webhook', async (req, res) => {
@@ -101,13 +107,8 @@ async function handleMessage(event) {
   const messageText = event.message?.text;
   if (!messageText) return;
 
-  // Init conversation history for this customer
   if (!conversations[senderId]) conversations[senderId] = [];
-
-  // Add customer message to history
   conversations[senderId].push({ role: 'user', content: messageText });
-
-  // Keep last 20 messages for memory
   if (conversations[senderId].length > 20) {
     conversations[senderId] = conversations[senderId].slice(-20);
   }
@@ -117,37 +118,56 @@ async function handleMessage(event) {
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 250,
+      max_tokens: 300,
       system: SYSTEM_PROMPT,
       messages: conversations[senderId]
     });
 
     let reply = response.content[0].text;
 
-    // Send images if AI triggered them
-    const imageMatches = reply.match(/\[SEND_IMAGE:(\w+)\]/gi);
-    if (imageMatches) {
-      for (const match of imageMatches) {
-        const type = match.replace(/\[SEND_IMAGE:/i, '').replace(']', '').toLowerCase();
-        const url = IMAGE_MAP[type];
-        if (url) {
-          await sendImage(senderId, url);
-          await new Promise(r => setTimeout(r, 700));
-        }
+    // Send 3+2 photos
+    if (reply.includes('[SHOW_3_2]')) {
+      reply = reply.replace('[SHOW_3_2]', '').trim();
+      for (const sofa of SOFAS_3_2) {
+        await sendImage(senderId, sofa.image);
+        await sleep(700);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sleep(500);
       }
-      reply = reply.replace(/\[SEND_IMAGE:\w+\]/gi, '').trim();
     }
 
-    // Add AI reply to conversation history
-    conversations[senderId].push({ role: 'assistant', content: reply });
+    // Send corner photos
+    if (reply.includes('[SHOW_CORNER]')) {
+      reply = reply.replace('[SHOW_CORNER]', '').trim();
+      for (const sofa of SOFAS_CORNER) {
+        await sendImage(senderId, sofa.image);
+        await sleep(700);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sleep(500);
+      }
+    }
 
+    // Send all photos
+    if (reply.includes('[SHOW_ALL]')) {
+      reply = reply.replace('[SHOW_ALL]', '').trim();
+      for (const sofa of ALL_SOFAS) {
+        await sendImage(senderId, sofa.image);
+        await sleep(700);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sleep(500);
+      }
+    }
+
+    conversations[senderId].push({ role: 'assistant', content: reply });
     if (reply) await sendMessage(senderId, reply);
 
   } catch (error) {
     console.error('Error:', error.message);
-    await sendMessage(senderId, `Hey sorry about that! Drop us a message on WhatsApp and we'll get back to you right away — ${WHATSAPP} 👍`);
+    await sendMessage(senderId, `Hey sorry! Drop us a message on WhatsApp and we'll sort you right away — ${WHATSAPP} 👍`);
   }
 }
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function sendMessage(recipientId, text) {
   try {
