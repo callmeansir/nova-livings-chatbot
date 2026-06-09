@@ -14,19 +14,19 @@ const WHATSAPP = '+447888368461';
 const G = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
 
 const SOFAS_3_2 = [
-  { id: 1, name: 'Roma Black 3+2 Recliner',    price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31.jpeg` },
-  { id: 2, name: 'Rio Cord Grey 3+2 Recliner', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(1).jpeg` },
-  { id: 3, name: 'Sorrento Grey 3+2 Recliner', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(2).jpeg` },
-  { id: 4, name: 'Roma Brown 3+2 Recliner',    price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(3).jpeg` },
-  { id: 5, name: 'Roma Grey 3+2 Recliner',     price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32.jpeg` },
+  { id: 1, name: 'Roma grey 3+2 Recliner',    price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31.jpeg` },
+  { id: 2, name: 'Roma black 3+2 Recliner', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(1).jpeg` },
+  { id: 3, name: 'roma brown 3+2 Recliner', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(2).jpeg` },
+  { id: 4, name: 'Rio cord 3+2 Recliner',    price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(3).jpeg` },
+  { id: 5, name: 'sorrento grey 3+2 Recliner',     price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32.jpeg` },
 ];
 
 const SOFAS_CORNER = [
-  { id: 6,  name: 'Rio Cord Corner Recliner',      price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(1).jpeg` },
-  { id: 7,  name: 'Roma Brown Corner Recliner',    price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(2).jpeg` },
-  { id: 8,  name: 'Roma Black Corner Recliner',    price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(3).jpeg` },
-  { id: 9,  name: 'Roma Grey Corner Recliner',     price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33.jpeg` },
-  { id: 10, name: 'Sorrento Grey Corner Recliner', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33%20(1).jpeg` },
+  { id: 6,  name: 'Roma brown Corner Recliner',      price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(1).jpeg` },
+  { id: 7,  name: 'sorrento grey Corner Recliner',    price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(2).jpeg` },
+  { id: 8,  name: 'Roma grey Corner Recliner',    price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(3).jpeg` },
+  { id: 9,  name: 'Rio cord Corner Recliner',     price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33.jpeg` },
+  { id: 10, name: 'roma black Corner Recliner', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33%20(1).jpeg` },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER];
