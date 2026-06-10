@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const Anthropic = require('@anthropic-ai/sdk');
+const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(express.json());
@@ -11,6 +12,37 @@ const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const WHATSAPP = '+447888368461';
 
 const G = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
+
+// ── Email setup ───────────────────────────────────────────────────────────────
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'thenasirkhan9@gmail.com',
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
+});
+
+async function sendOrderEmail(orderDetails) {
+  try {
+    await transporter.sendMail({
+      from: 'thenasirkhan9@gmail.com',
+      to: 'thenasirkhan9@gmail.com',
+      subject: '🛋️ New Order — Nova Livings',
+      html: `
+        <h2>New Order Received!</h2>
+        <p><strong>Time:</strong> ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}</p>
+        <hr/>
+        <h3>Order Details:</h3>
+        <pre style="font-size:15px; background:#f4f4f4; padding:15px; border-radius:8px;">${orderDetails}</pre>
+        <hr/>
+        <p style="color:#888;">Sent automatically by Nova Livings chatbot</p>
+      `
+    });
+    console.log('Order email sent successfully');
+  } catch (e) {
+    console.error('Email send error:', e.message);
+  }
+}
 
 // ── Products ──────────────────────────────────────────────────────────────────
 
@@ -81,6 +113,12 @@ function cancelReminder(senderId) {
     delete reminderTimers[senderId];
     console.log(`Reminder cancelled for ${senderId} — customer came back`);
   }
+}
+
+// ── Detect order confirmation in reply ────────────────────────────────────────
+function isOrderConfirmed(text) {
+  const lower = text.toLowerCase();
+  return lower.includes("order is confirmed") || lower.includes("we'll be in touch to arrange delivery");
 }
 
 // ── System prompt ─────────────────────────────────────────────────────────────
@@ -154,7 +192,6 @@ STEP 3b — CUSTOMER ASKS FOR PHOTO MID-CONVERSATION:
 If customer says "photo", "photo?", "send photo", "can I see it", "show me", "pic", "picture", "image" or any similar request:
 → Look at the conversation history to find the last sofa being discussed.
 → ALWAYS send [SHOW_ID:X] for that sofa immediately. Never reply with text only.
-→ Example: if last sofa discussed was Roma Black Corner (ID 10), reply with [SHOW_ID:10]
 
 STEP 3c — CUSTOMER ADDS EXTRA PIECES:
 If customer wants to add an extra piece to their order (e.g. "and a 2 seater", "plus a chair"):
@@ -166,8 +203,8 @@ If customer says yes / ready to order:
 → Reply EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
 
 STEP 5 — ORDER CONFIRMED:
-Once customer provides their details:
-→ Reply: "Perfect! Your order is confirmed. We'll be in touch to arrange delivery. Thank you for choosing Nova Livings! 👍"
+Once customer provides their details (name, address, postcode, contact number):
+→ Reply EXACTLY: "Perfect! Your order is confirmed. We'll be in touch to arrange delivery. Thank you for choosing Nova Livings! 👍"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 PHOTO TRIGGER REFERENCE:
@@ -180,7 +217,7 @@ PHOTO TRIGGER REFERENCE:
 CRITICAL RULES:
 - IDs 1-10 ALL have photos. ALWAYS use [SHOW_ID:X] for any of these. NEVER say "photos not available" or "photos coming soon" for IDs 1-10. This includes Rio Cord (IDs 4 and 9).
 - ONLY IDs 11-16 have no photos. Never use photo triggers for these.
-- If customer says "photo", "pic", "show me", "can I see it" or anything similar — always send [SHOW_ID:X] for the last sofa discussed. Never reply with text only when a photo is requested.
+- If customer says "photo", "pic", "show me", "can I see it" — always send [SHOW_ID:X] for the last sofa discussed.
 - Never send group photos again after customer has picked a specific sofa.
 - If customer asks about delivery, price, payment or dimensions mid-flow, answer briefly then return to the flow.
 - If unsure which sofa they mean, ask one clarifying question only.`;
@@ -292,6 +329,17 @@ async function handleMessage(event) {
     // ── Send the text reply ───────────────────────────────────────────────
     conversations[senderId].push({ role: 'assistant', content: reply });
     if (reply) await sendMessage(senderId, reply);
+
+    // ── Send order notification email ─────────────────────────────────────
+    if (isOrderConfirmed(reply)) {
+      // Extract last few messages to get customer details
+      const recentMessages = conversations[senderId].slice(-6);
+      const orderDetails = recentMessages
+        .map(m => `${m.role === 'user' ? 'Customer' : 'Bot'}: ${m.content}`)
+        .join('\n');
+      await sendOrderEmail(orderDetails);
+      console.log(`Order confirmed for ${senderId} — email sent`);
+    }
 
   } catch (error) {
     console.error('Error:', error.message);
