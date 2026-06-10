@@ -13,42 +13,87 @@ const WHATSAPP = '+447888368461';
 const G = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
 
 const SOFAS_3_2 = [
-  { id: 1, name: 'Roma Black 3+2 Recliner',   colour: 'black',  price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(1).jpeg` },
-  { id: 2, name: 'Roma Grey 3+2 Recliner',    colour: 'grey',   price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31.jpeg` },
-  { id: 3, name: 'Roma Brown 3+2 Recliner',   colour: 'brown',  price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(2).jpeg` },
-  { id: 4, name: 'Rio Cord Grey 3+2 Recliner',colour: 'grey',   price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(3).jpeg` },
-  { id: 5, name: 'Sorrento Grey 3+2 Recliner',colour: 'grey',   price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32.jpeg` },
+  { id: 1, name: 'Roma Black 3+2 Recliner',    colour: 'black', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(1).jpeg` },
+  { id: 2, name: 'Roma Grey 3+2 Recliner',     colour: 'grey',  price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31.jpeg` },
+  { id: 3, name: 'Roma Brown 3+2 Recliner',    colour: 'brown', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(2).jpeg` },
+  { id: 4, name: 'Rio Cord Grey 3+2 Recliner', colour: 'grey',  price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(3).jpeg` },
+  { id: 5, name: 'Sorrento Grey 3+2 Recliner', colour: 'grey',  price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32.jpeg` },
 ];
 
 const SOFAS_CORNER = [
-  { id: 6,  name: 'Roma Brown Corner Recliner',   colour: 'brown', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(1).jpeg` },
-  { id: 7,  name: 'Sorrento Grey Corner Recliner',colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(2).jpeg` },
-  { id: 8,  name: 'Roma Grey Corner Recliner',    colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(3).jpeg` },
-  { id: 9,  name: 'Rio Cord Corner Recliner',     colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33.jpeg` },
-  { id: 10, name: 'Roma Black Corner Recliner',   colour: 'black', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33%20(1).jpeg` },
+  { id: 6,  name: 'Roma Brown Corner Recliner',    colour: 'brown', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(1).jpeg` },
+  { id: 7,  name: 'Sorrento Grey Corner Recliner', colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(2).jpeg` },
+  { id: 8,  name: 'Roma Grey Corner Recliner',     colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(3).jpeg` },
+  { id: 9,  name: 'Rio Cord Corner Recliner',      colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33.jpeg` },
+  { id: 10, name: 'Roma Black Corner Recliner',    colour: 'black', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33%20(1).jpeg` },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER];
 
-// ── System prompt ────────────────────────────────────────────────────────────
+// ── 24-hour reminder system ───────────────────────────────────────────────────
+const reminderTimers = {}; // senderId → setTimeout handle
+
+const HESITATION_PHRASES = [
+  "i'll get back to you", "ill get back to you",
+  "let me think", "i'll think about it", "ill think about it",
+  "i'll check with my wife", "i'll check with my husband", "i'll check with my partner",
+  "ill check with my wife", "ill check with my husband", "ill check with my partner",
+  "maybe later", "not sure yet",
+  "i'll decide later", "ill decide later",
+  "let me check", "i'll come back to you", "ill come back to you",
+  "i'll message you later", "ill message you later",
+  "busy right now", "i'm busy"
+];
+
+const REMINDER_DELAY_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function checkHesitation(text) {
+  const lower = text.toLowerCase();
+  return HESITATION_PHRASES.some(phrase => lower.includes(phrase));
+}
+
+function scheduleReminder(senderId) {
+  // Cancel any existing reminder for this customer
+  if (reminderTimers[senderId]) {
+    clearTimeout(reminderTimers[senderId]);
+  }
+  reminderTimers[senderId] = setTimeout(async () => {
+    console.log(`Sending 24hr reminder to ${senderId}`);
+    await sendMessage(senderId,
+      `Hey! 👋 Just checking in — are you still interested in the sofa? We'd love to help you find the perfect one. Feel free to ask any questions 😊`
+    );
+    delete reminderTimers[senderId];
+  }, REMINDER_DELAY_MS);
+  console.log(`Reminder scheduled for ${senderId} in 24 hours`);
+}
+
+function cancelReminder(senderId) {
+  if (reminderTimers[senderId]) {
+    clearTimeout(reminderTimers[senderId]);
+    delete reminderTimers[senderId];
+    console.log(`Reminder cancelled for ${senderId} — customer came back`);
+  }
+}
+
+// ── System prompt ─────────────────────────────────────────────────────────────
 function buildSystemPrompt() {
   return `You are a friendly sales assistant for Nova Livings, a UK sofa business.
 Reply like a real human — warm, short, natural. No bullet points, no bold text, max 2-3 sentences.
 
 PRODUCTS:
 3+2 RECLINER SETS — £550 (manual recliners, free UK delivery):
-1. Roma Black 3+2     — black leather, cup holders
-2. Roma Grey 3+2      — grey leather, cup holders
-3. Roma Brown 3+2     — brown leather, cup holders
-4. Rio Cord Grey 3+2  — grey cord fabric
-5. Sorrento Grey 3+2  — grey fabric, cup holders
+1. Roma Black 3+2     — black leather, cup holders | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
+2. Roma Grey 3+2      — grey leather, cup holders  | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
+3. Roma Brown 3+2     — brown leather, cup holders | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
+4. Rio Cord Grey 3+2  — grey cord fabric            | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
+5. Sorrento Grey 3+2  — grey fabric, cup holders   | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
 
 CORNER RECLINERS — £580 (manual recliners, free UK delivery):
-6.  Roma Brown Corner    — brown leather, cup holders
-7.  Sorrento Grey Corner — grey fabric, cup holders
-8.  Roma Grey Corner     — grey leather, cup holders
-9.  Rio Cord Corner      — grey cord fabric
-10. Roma Black Corner    — black leather, cup holders
+6.  Roma Brown Corner    — brown leather, cup holders | 230cm x 230cm, 95cm depth, 95cm height
+7.  Sorrento Grey Corner — grey fabric, cup holders   | 230cm x 230cm, 95cm depth, 95cm height
+8.  Roma Grey Corner     — grey leather, cup holders  | 230cm x 230cm, 95cm depth, 95cm height
+9.  Rio Cord Corner      — grey cord fabric            | 230cm x 230cm, 95cm depth, 95cm height
+10. Roma Black Corner    — black leather, cup holders | 230cm x 230cm, 95cm depth, 95cm height
 
 DELIVERY: Free UK delivery, 2-4 working days, free assembly included. We ring the day before with an exact time. Customer can request a specific day/date.
 PAYMENT: Cash on delivery. Bank transfer also accepted if customer asks.
@@ -88,12 +133,12 @@ PHOTO TRIGGER REFERENCE (use in your reply text):
 
 IMPORTANT RULES:
 - Never send group photos again after customer has picked a specific sofa.
-- If customer asks about delivery, price, or payment mid-flow, answer briefly then return to the flow.
+- If customer asks about delivery, price, payment or dimensions mid-flow, answer briefly then return to the flow.
 - If unsure which sofa they mean, ask one clarifying question only.
-- Always use [SHOW_ID:X] for a specific sofa, never re-send [SHOW_ALL] or [SHOW_CORNER] etc. at that point.`;
+- Always use [SHOW_ID:X] for a specific sofa, never re-send [SHOW_ALL] or [SHOW_CORNER] at that point.`;
 }
 
-// ── Webhook verification ─────────────────────────────────────────────────────
+// ── Webhook verification ──────────────────────────────────────────────────────
 app.get('/webhook', (req, res) => {
   if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === VERIFY_TOKEN) {
     res.status(200).send(req.query['hub.challenge']);
@@ -102,7 +147,7 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// ── Incoming messages ────────────────────────────────────────────────────────
+// ── Incoming messages ─────────────────────────────────────────────────────────
 app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
   const body = req.body;
@@ -123,10 +168,18 @@ async function handleMessage(event) {
   const messageText = event.message?.text;
   if (!messageText) return;
 
+  // Customer replied — cancel any pending reminder
+  cancelReminder(senderId);
+
   if (!conversations[senderId]) conversations[senderId] = [];
   conversations[senderId].push({ role: 'user', content: messageText });
   if (conversations[senderId].length > 30) {
     conversations[senderId] = conversations[senderId].slice(-30);
+  }
+
+  // Check if customer used a hesitation phrase → schedule 24hr reminder
+  if (checkHesitation(messageText)) {
+    scheduleReminder(senderId);
   }
 
   try {
@@ -141,7 +194,7 @@ async function handleMessage(event) {
 
     let reply = response.content[0].text;
 
-    // ── Handle [SHOW_ALL] ──────────────────────────────────────────────────
+    // ── Handle [SHOW_ALL] ─────────────────────────────────────────────────
     if (reply.includes('[SHOW_ALL]')) {
       reply = reply.replace('[SHOW_ALL]', '').trim();
       for (const sofa of ALL_SOFAS) {
@@ -152,7 +205,7 @@ async function handleMessage(event) {
       }
     }
 
-    // ── Handle [SHOW_3_2] ──────────────────────────────────────────────────
+    // ── Handle [SHOW_3_2] ─────────────────────────────────────────────────
     else if (reply.includes('[SHOW_3_2]')) {
       reply = reply.replace('[SHOW_3_2]', '').trim();
       for (const sofa of SOFAS_3_2) {
@@ -163,7 +216,7 @@ async function handleMessage(event) {
       }
     }
 
-    // ── Handle [SHOW_CORNER] ───────────────────────────────────────────────
+    // ── Handle [SHOW_CORNER] ──────────────────────────────────────────────
     else if (reply.includes('[SHOW_CORNER]')) {
       reply = reply.replace('[SHOW_CORNER]', '').trim();
       for (const sofa of SOFAS_CORNER) {
@@ -174,7 +227,7 @@ async function handleMessage(event) {
       }
     }
 
-    // ── Handle [SHOW_ID:X] — sends ONE specific sofa ───────────────────────
+    // ── Handle [SHOW_ID:X] — sends ONE specific sofa ──────────────────────
     const showIdMatch = reply.match(/\[SHOW_ID:(\d+)\]/);
     if (showIdMatch) {
       const sofaId = parseInt(showIdMatch[1]);
@@ -188,7 +241,7 @@ async function handleMessage(event) {
       }
     }
 
-    // ── Send the text reply ────────────────────────────────────────────────
+    // ── Send the text reply ───────────────────────────────────────────────
     conversations[senderId].push({ role: 'assistant', content: reply });
     if (reply) await sendMessage(senderId, reply);
 
@@ -198,7 +251,7 @@ async function handleMessage(event) {
   }
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function sendMessage(recipientId, text) {
