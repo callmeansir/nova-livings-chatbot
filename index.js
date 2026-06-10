@@ -12,26 +12,38 @@ const WHATSAPP = '+447888368461';
 
 const G = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
 
+// ── Products ──────────────────────────────────────────────────────────────────
+
 const SOFAS_3_2 = [
-  { id: 1, name: 'Roma Black 3+2 Recliner',    colour: 'black', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(1).jpeg` },
-  { id: 2, name: 'Roma Grey 3+2 Recliner',     colour: 'grey',  price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31.jpeg` },
-  { id: 3, name: 'Roma Brown 3+2 Recliner',    colour: 'brown', price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(2).jpeg` },
-  { id: 4, name: 'Rio Cord Grey 3+2 Recliner', colour: 'grey',  price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(3).jpeg` },
-  { id: 5, name: 'Sorrento Grey 3+2 Recliner', colour: 'grey',  price: '£550', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32.jpeg` },
+  { id: 1,  name: 'Roma Black 3+2 Recliner',    colour: 'black', price: 550, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(1).jpeg` },
+  { id: 2,  name: 'Roma Grey 3+2 Recliner',     colour: 'grey',  price: 550, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31.jpeg` },
+  { id: 3,  name: 'Roma Brown 3+2 Recliner',    colour: 'brown', price: 550, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(2).jpeg` },
+  { id: 4,  name: 'Rio Cord Grey 3+2 Recliner', colour: 'grey',  price: 550, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.31%20(3).jpeg` },
+  { id: 5,  name: 'Sorrento Grey 3+2 Recliner', colour: 'grey',  price: 550, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32.jpeg` },
 ];
 
 const SOFAS_CORNER = [
-  { id: 6,  name: 'Roma Brown Corner Recliner',    colour: 'brown', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(1).jpeg` },
-  { id: 7,  name: 'Sorrento Grey Corner Recliner', colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(2).jpeg` },
-  { id: 8,  name: 'Roma Grey Corner Recliner',     colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(3).jpeg` },
-  { id: 9,  name: 'Rio Cord Corner Recliner',      colour: 'grey',  price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33.jpeg` },
-  { id: 10, name: 'Roma Black Corner Recliner',    colour: 'black', price: '£580', image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33%20(1).jpeg` },
+  { id: 6,  name: 'Roma Brown Corner Recliner',    colour: 'brown', price: 580, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(1).jpeg` },
+  { id: 7,  name: 'Sorrento Grey Corner Recliner', colour: 'grey',  price: 580, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(2).jpeg` },
+  { id: 8,  name: 'Roma Grey Corner Recliner',     colour: 'grey',  price: 580, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.32%20(3).jpeg` },
+  { id: 9,  name: 'Rio Cord Corner Recliner',      colour: 'grey',  price: 580, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33.jpeg` },
+  { id: 10, name: 'Roma Black Corner Recliner',    colour: 'black', price: 580, image: `${G}/WhatsApp%20Image%202026-06-09%20at%2020.55.33%20(1).jpeg` },
 ];
 
-const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER];
+// Individual pieces — photos to be added later
+const SOFAS_INDIVIDUAL = [
+  { id: 11, name: '3 Seater Recliner',  type: '3seater', price: 350, image: null },
+  { id: 12, name: '2 Seater Recliner',  type: '2seater', price: 300, image: null },
+  { id: 13, name: 'Single Chair',       type: 'chair',   price: 220, image: null },
+  { id: 14, name: '2+2 Recliner Set',   type: '2+2',     price: 500, image: null },
+  { id: 15, name: '3+1 Recliner Set',   type: '3+1',     price: 520, image: null },
+  { id: 16, name: '3+3 Recliner Set',   type: '3+3',     price: 620, image: null },
+];
+
+const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER, ...SOFAS_INDIVIDUAL];
 
 // ── 24-hour reminder system ───────────────────────────────────────────────────
-const reminderTimers = {}; // senderId → setTimeout handle
+const reminderTimers = {};
 
 const HESITATION_PHRASES = [
   "i'll get back to you", "ill get back to you",
@@ -45,7 +57,7 @@ const HESITATION_PHRASES = [
   "busy right now", "i'm busy"
 ];
 
-const REMINDER_DELAY_MS = 24 * 60 * 60 * 1000; // 24 hours
+const REMINDER_DELAY_MS = 24 * 60 * 60 * 1000;
 
 function checkHesitation(text) {
   const lower = text.toLowerCase();
@@ -53,10 +65,7 @@ function checkHesitation(text) {
 }
 
 function scheduleReminder(senderId) {
-  // Cancel any existing reminder for this customer
-  if (reminderTimers[senderId]) {
-    clearTimeout(reminderTimers[senderId]);
-  }
+  if (reminderTimers[senderId]) clearTimeout(reminderTimers[senderId]);
   reminderTimers[senderId] = setTimeout(async () => {
     console.log(`Sending 24hr reminder to ${senderId}`);
     await sendMessage(senderId,
@@ -80,21 +89,45 @@ function buildSystemPrompt() {
   return `You are a friendly sales assistant for Nova Livings, a UK sofa business.
 Reply like a real human — warm, short, natural. No bullet points, no bold text, max 2-3 sentences.
 
-PRODUCTS:
-3+2 RECLINER SETS — £550 (manual recliners, free UK delivery):
-1. Roma Black 3+2     — black leather, cup holders | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
-2. Roma Grey 3+2      — grey leather, cup holders  | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
-3. Roma Brown 3+2     — brown leather, cup holders | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
-4. Rio Cord Grey 3+2  — grey cord fabric            | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
-5. Sorrento Grey 3+2  — grey fabric, cup holders   | 3 seater: 195cm wide, 95cm depth, 95cm height | 2 seater: 145cm wide, 95cm depth, 95cm height
+━━━━━━━━━━━━━━━━━━━━━━━
+PRODUCTS & PRICES:
 
-CORNER RECLINERS — £580 (manual recliners, free UK delivery):
-6.  Roma Brown Corner    — brown leather, cup holders | 230cm x 230cm, 95cm depth, 95cm height
-7.  Sorrento Grey Corner — grey fabric, cup holders   | 230cm x 230cm, 95cm depth, 95cm height
-8.  Roma Grey Corner     — grey leather, cup holders  | 230cm x 230cm, 95cm depth, 95cm height
-9.  Rio Cord Corner      — grey cord fabric            | 230cm x 230cm, 95cm depth, 95cm height
-10. Roma Black Corner    — black leather, cup holders | 230cm x 230cm, 95cm depth, 95cm height
+3+2 RECLINER SETS — £550 each:
+1. Roma Black 3+2     — black leather, cup holders | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
+2. Roma Grey 3+2      — grey leather, cup holders  | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
+3. Roma Brown 3+2     — brown leather, cup holders | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
+4. Rio Cord Grey 3+2  — grey cord fabric            | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
+5. Sorrento Grey 3+2  — grey fabric, cup holders   | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
 
+CORNER RECLINERS — £580 each:
+6.  Roma Brown Corner    — brown leather, cup holders | 230 x 230 cm, 95D x 95H cm
+7.  Sorrento Grey Corner — grey fabric, cup holders   | 230 x 230 cm, 95D x 95H cm
+8.  Roma Grey Corner     — grey leather, cup holders  | 230 x 230 cm, 95D x 95H cm
+9.  Rio Cord Corner      — grey cord fabric            | 230 x 230 cm, 95D x 95H cm
+10. Roma Black Corner    — black leather, cup holders | 230 x 230 cm, 95D x 95H cm
+
+INDIVIDUAL PIECES (same ranges, photos coming soon):
+11. 3 Seater Recliner  — £350
+12. 2 Seater Recliner  — £300
+13. Single Chair        — £220
+14. 2+2 Recliner Set   — £500
+15. 3+1 Recliner Set   — £520
+16. 3+3 Recliner Set   — £620
+
+━━━━━━━━━━━━━━━━━━━━━━━
+PRICING COMBINATIONS — always add prices together:
+- Corner + Single Chair    = £580 + £220 = £800
+- Corner + 2 Seater        = £580 + £300 = £880
+- Corner + 3 Seater        = £580 + £350 = £930
+- 3+2 Set + extra 2 Seater = £550 + £300 = £850
+- 3+2 Set + extra 3 Seater = £550 + £350 = £900
+- 3+2 Set + extra Chair    = £550 + £220 = £770
+- Any other combination: simply add the individual prices together.
+
+When customer asks for a combination, calculate the total immediately and say:
+"That'll be £[total] in total with free delivery 😊 Shall I go ahead with the order?"
+
+━━━━━━━━━━━━━━━━━━━━━━━
 DELIVERY: Free UK delivery, 2-4 working days, free assembly included. We ring the day before with an exact time. Customer can request a specific day/date.
 PAYMENT: Cash on delivery. Bank transfer also accepted if customer asks.
 WHATSAPP: ${WHATSAPP}
@@ -104,17 +137,24 @@ CONVERSATION FLOW — follow this EXACTLY:
 
 STEP 1 — FIRST MESSAGE / AD ARRIVAL:
 If customer says "can i make a purchase", "interested", or comes from an ad:
-→ Reply: [SHOW_ALL] then ask "Are you looking for a 3+2 set or a corner sofa? 😊"
+→ Reply: [SHOW_ALL] then ask "Are you looking for a 3+2 set, a corner sofa, or individual pieces? 😊"
 
 STEP 2 — CUSTOMER PICKS TYPE:
-If customer says "3+2" → Reply: [SHOW_3_2] then ask "Which one catches your eye? You can pick by number or name 😊"
-If customer says "corner" → Reply: [SHOW_CORNER] then ask "Which one catches your eye? You can pick by number or name 😊"
+If customer says "3+2"        → Reply: [SHOW_3_2] then ask "Which one catches your eye? You can pick by number or name 😊"
+If customer says "corner"     → Reply: [SHOW_CORNER] then ask "Which one catches your eye? You can pick by number or name 😊"
+If customer says "individual" or asks about single pieces → list individual pieces with prices, ask what they need.
 
 STEP 3 — CUSTOMER PICKS A SPECIFIC SOFA:
 Once customer mentions a specific sofa (e.g. "black corner", "number 10", "Roma Grey 3+2", "brown one"):
-→ Send ONLY that one sofa's photo using [SHOW_ID:X] where X is the product number.
-→ Then confirm: "Great choice! The [name] is [price] with free delivery 😊 Shall I go ahead and place your order?"
+→ If it has a photo (IDs 1-10): send ONLY that one sofa's photo using [SHOW_ID:X].
+→ If it has no photo yet (IDs 11-16): just confirm name and price in text, no photo trigger.
+→ Then confirm: "Great choice! The [name] is £[price] with free delivery 😊 Shall I go ahead and place your order?"
 → Do NOT send group photos again at this point.
+
+STEP 3b — CUSTOMER ADDS EXTRA PIECES:
+If customer wants to add an extra piece to their order (e.g. "and a 2 seater", "plus a chair"):
+→ Add the prices together immediately.
+→ Say: "That'll be £[total] in total with free delivery 😊 Shall I go ahead with the order?"
 
 STEP 4 — ORDER COLLECTION:
 If customer says yes / ready to order:
@@ -125,17 +165,17 @@ Once customer provides their details:
 → Reply: "Perfect! Your order is confirmed. We'll be in touch to arrange delivery. Thank you for choosing Nova Livings! 👍"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-PHOTO TRIGGER REFERENCE (use in your reply text):
-[SHOW_ALL]    = sends all 10 sofa photos
+PHOTO TRIGGER REFERENCE:
+[SHOW_ALL]    = sends all 10 set/corner photos (IDs 1-10 only)
 [SHOW_3_2]    = sends the 5 three+two photos
 [SHOW_CORNER] = sends the 5 corner photos
-[SHOW_ID:X]   = sends ONLY the photo for sofa number X (1–10)
+[SHOW_ID:X]   = sends ONLY the photo for sofa number X (use for IDs 1-10 only)
 
 IMPORTANT RULES:
 - Never send group photos again after customer has picked a specific sofa.
+- Never use photo triggers for individual pieces (IDs 11-16) — no photos yet.
 - If customer asks about delivery, price, payment or dimensions mid-flow, answer briefly then return to the flow.
-- If unsure which sofa they mean, ask one clarifying question only.
-- Always use [SHOW_ID:X] for a specific sofa, never re-send [SHOW_ALL] or [SHOW_CORNER] at that point.`;
+- If unsure which sofa they mean, ask one clarifying question only.`;
 }
 
 // ── Webhook verification ──────────────────────────────────────────────────────
@@ -177,7 +217,7 @@ async function handleMessage(event) {
     conversations[senderId] = conversations[senderId].slice(-30);
   }
 
-  // Check if customer used a hesitation phrase → schedule 24hr reminder
+  // Check hesitation phrases → schedule 24hr reminder
   if (checkHesitation(messageText)) {
     scheduleReminder(senderId);
   }
@@ -197,10 +237,10 @@ async function handleMessage(event) {
     // ── Handle [SHOW_ALL] ─────────────────────────────────────────────────
     if (reply.includes('[SHOW_ALL]')) {
       reply = reply.replace('[SHOW_ALL]', '').trim();
-      for (const sofa of ALL_SOFAS) {
+      for (const sofa of [...SOFAS_3_2, ...SOFAS_CORNER]) {
         await sendImage(senderId, sofa.image);
         await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
         await sleep(400);
       }
     }
@@ -211,7 +251,7 @@ async function handleMessage(event) {
       for (const sofa of SOFAS_3_2) {
         await sendImage(senderId, sofa.image);
         await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
         await sleep(400);
       }
     }
@@ -222,7 +262,7 @@ async function handleMessage(event) {
       for (const sofa of SOFAS_CORNER) {
         await sendImage(senderId, sofa.image);
         await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
         await sleep(400);
       }
     }
@@ -233,10 +273,10 @@ async function handleMessage(event) {
       const sofaId = parseInt(showIdMatch[1]);
       const sofa = ALL_SOFAS.find(s => s.id === sofaId);
       reply = reply.replace(/\[SHOW_ID:\d+\]/, '').trim();
-      if (sofa) {
+      if (sofa && sofa.image) {
         await sendImage(senderId, sofa.image);
         await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — ${sofa.price}`);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
         await sleep(400);
       }
     }
