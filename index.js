@@ -1,7 +1,6 @@
 const express = require('express');
 const axios = require('axios');
 const Anthropic = require('@anthropic-ai/sdk');
-const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(express.json());
@@ -13,34 +12,35 @@ const WHATSAPP = '+447888368461';
 
 const G = 'https://raw.githubusercontent.com/callmeansir/nova-livings-chatbot/main/images';
 
-// ── Email setup ───────────────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'thenasirkhan9@gmail.com',
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-});
-
+// ── Email via Resend ──────────────────────────────────────────────────────────
 async function sendOrderEmail(orderDetails) {
   try {
-    await transporter.sendMail({
-      from: 'thenasirkhan9@gmail.com',
-      to: 'thenasirkhan9@gmail.com',
-      subject: '🛋️ New Order — Nova Livings',
-      html: `
-        <h2>New Order Received!</h2>
-        <p><strong>Time:</strong> ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}</p>
-        <hr/>
-        <h3>Order Details:</h3>
-        <pre style="font-size:15px; background:#f4f4f4; padding:15px; border-radius:8px;">${orderDetails}</pre>
-        <hr/>
-        <p style="color:#888;">Sent automatically by Nova Livings chatbot</p>
-      `
-    });
-    console.log('Order email sent successfully');
+    await axios.post(
+      'https://api.resend.com/emails',
+      {
+        from: 'Nova Livings <onboarding@resend.dev>',
+        to: 'thenasirkhan9@gmail.com',
+        subject: '🛋️ New Order — Nova Livings',
+        html: `
+          <h2>New Order Received! 🛋️</h2>
+          <p><strong>Time:</strong> ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}</p>
+          <hr/>
+          <h3>Customer Details:</h3>
+          <pre style="font-size:15px; background:#f4f4f4; padding:15px; border-radius:8px;">${orderDetails}</pre>
+          <hr/>
+          <p style="color:#888;">Sent automatically by Nova Livings chatbot</p>
+        `
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log('Order email sent successfully via Resend');
   } catch (e) {
-    console.error('Email send error:', e.message);
+    console.error('Email send error:', e.response?.data || e.message);
   }
 }
 
@@ -115,7 +115,6 @@ function cancelReminder(senderId) {
   }
 }
 
-// ── Detect order confirmation in reply ────────────────────────────────────────
 function isOrderConfirmed(text) {
   const lower = text.toLowerCase();
   return lower.includes("order is confirmed") || lower.includes("we'll be in touch to arrange delivery");
@@ -253,7 +252,6 @@ async function handleMessage(event) {
   const messageText = event.message?.text;
   if (!messageText) return;
 
-  // Customer replied — cancel any pending reminder
   cancelReminder(senderId);
 
   if (!conversations[senderId]) conversations[senderId] = [];
@@ -262,7 +260,6 @@ async function handleMessage(event) {
     conversations[senderId] = conversations[senderId].slice(-30);
   }
 
-  // Check hesitation phrases → schedule 24hr reminder
   if (checkHesitation(messageText)) {
     scheduleReminder(senderId);
   }
@@ -279,7 +276,6 @@ async function handleMessage(event) {
 
     let reply = response.content[0].text;
 
-    // ── Handle [SHOW_ALL] ─────────────────────────────────────────────────
     if (reply.includes('[SHOW_ALL]')) {
       reply = reply.replace('[SHOW_ALL]', '').trim();
       for (const sofa of [...SOFAS_3_2, ...SOFAS_CORNER]) {
@@ -288,10 +284,7 @@ async function handleMessage(event) {
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
         await sleep(400);
       }
-    }
-
-    // ── Handle [SHOW_3_2] ─────────────────────────────────────────────────
-    else if (reply.includes('[SHOW_3_2]')) {
+    } else if (reply.includes('[SHOW_3_2]')) {
       reply = reply.replace('[SHOW_3_2]', '').trim();
       for (const sofa of SOFAS_3_2) {
         await sendImage(senderId, sofa.image);
@@ -299,10 +292,7 @@ async function handleMessage(event) {
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
         await sleep(400);
       }
-    }
-
-    // ── Handle [SHOW_CORNER] ──────────────────────────────────────────────
-    else if (reply.includes('[SHOW_CORNER]')) {
+    } else if (reply.includes('[SHOW_CORNER]')) {
       reply = reply.replace('[SHOW_CORNER]', '').trim();
       for (const sofa of SOFAS_CORNER) {
         await sendImage(senderId, sofa.image);
@@ -312,7 +302,6 @@ async function handleMessage(event) {
       }
     }
 
-    // ── Handle [SHOW_ID:X] — sends ONE specific sofa ──────────────────────
     const showIdMatch = reply.match(/\[SHOW_ID:(\d+)\]/);
     if (showIdMatch) {
       const sofaId = parseInt(showIdMatch[1]);
@@ -326,13 +315,11 @@ async function handleMessage(event) {
       }
     }
 
-    // ── Send the text reply ───────────────────────────────────────────────
     conversations[senderId].push({ role: 'assistant', content: reply });
     if (reply) await sendMessage(senderId, reply);
 
     // ── Send order notification email ─────────────────────────────────────
     if (isOrderConfirmed(reply)) {
-      // Extract last few messages to get customer details
       const recentMessages = conversations[senderId].slice(-6);
       const orderDetails = recentMessages
         .map(m => `${m.role === 'user' ? 'Customer' : 'Bot'}: ${m.content}`)
