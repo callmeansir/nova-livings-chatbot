@@ -170,7 +170,7 @@ function isOrderConfirmed(text) {
 // ── System prompt ─────────────────────────────────────────────────────────────
 function buildSystemPrompt() {
   return `You are a friendly sales assistant for Nova Livings, a UK sofa business.
-Reply like a real human — warm, short, natural. No bullet points, no bold text, max 2-3 sentences per message.
+Reply like a real human texting a friend — warm, short, casual. Max 1-2 short sentences per message. If you need to say more, split into separate short messages using the [SPLIT] tag between them. Never write long paragraphs. Keep it punchy and natural.
 
 ${getLiveDateContext()}
 
@@ -434,7 +434,15 @@ async function handleMessage(event) {
     reply = reply.replace(/\[SHOW_ID:\d+\]/g, '').trim();
 
     conversations[senderId].push({ role: 'assistant', content: reply });
-    if (reply) await sendMessage(senderId, reply);
+
+    // Split reply into multiple messages if [SPLIT] tag present
+    if (reply) {
+      const parts = reply.split('[SPLIT]').map(p => p.trim()).filter(p => p.length > 0);
+      for (let i = 0; i < parts.length; i++) {
+        await sendMessage(senderId, parts[i]);
+        if (i < parts.length - 1) await sleep(800);
+      }
+    }
 
     // ── Order email ───────────────────────────────────────────────────────
     if (isOrderConfirmed(reply)) {
