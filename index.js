@@ -103,12 +103,16 @@ const SOFAS_INDIVIDUAL = [
   { id: 18, name: 'Roma Brown 2 Seater',    type: '2seater', colour: 'brown', price: 300, image: `${G}/romabrown2.jpeg` },
   { id: 19, name: 'Rio Cord Grey 2 Seater', type: '2seater', colour: 'grey',  price: 300, image: `${G}/rio2.jpeg` },
   { id: 20, name: 'Sorrento Grey 2 Seater', type: '2seater', colour: 'grey',  price: 300, image: `${G}/sorrento2.jpeg` },
-  // Chairs — photos coming soon
-  { id: 21, name: 'Single Chair',           type: 'chair',   colour: null,    price: 220, image: null },
+  // Chairs
+  { id: 21, name: 'Roma Black Chair',    type: 'chair', colour: 'black', price: 220, image: `${G}/romablackchair.jpeg` },
+  { id: 22, name: 'Roma Grey Chair',     type: 'chair', colour: 'grey',  price: 220, image: `${G}/romagreychair.jpeg` },
+  { id: 23, name: 'Roma Brown Chair',    type: 'chair', colour: 'brown', price: 220, image: `${G}/romabrownchair.jpeg` },
+  { id: 24, name: 'Rio Cord Grey Chair', type: 'chair', colour: 'grey',  price: 220, image: `${G}/cordchair.jpeg` },
+  { id: 25, name: 'Sorrento Grey Chair', type: 'chair', colour: 'grey',  price: 220, image: `${G}/sorrentochair.jpeg` },
   // Sets
-  { id: 22, name: '2+2 Recliner Set',       type: '2+2',     colour: null,    price: 500, image: null },
-  { id: 23, name: '3+1 Recliner Set',       type: '3+1',     colour: null,    price: 520, image: null },
-  { id: 24, name: '3+3 Recliner Set',       type: '3+3',     colour: null,    price: 620, image: null },
+  { id: 26, name: '2+2 Recliner Set',   type: '2+2',   colour: null,    price: 500, image: null },
+  { id: 27, name: '3+1 Recliner Set',   type: '3+1',   colour: null,    price: 520, image: null },
+  { id: 28, name: '3+3 Recliner Set',   type: '3+3',   colour: null,    price: 620, image: null },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER, ...SOFAS_INDIVIDUAL];
@@ -197,8 +201,9 @@ INDIVIDUAL 2 SEATERS — £300 (ALL have photos, IDs 16-20):
 16. Roma Black 2 Seater — black LEATHER | 17. Roma Grey 2 Seater — grey LEATHER | 18. Roma Brown 2 Seater — brown LEATHER | 19. Rio Cord Grey 2 Seater — grey CORD fabric | 20. Sorrento Grey 2 Seater — grey FABRIC
 Dimensions: 145W x 95D x 95H cm
 
-SINGLE CHAIR — £220 (ID 21) | 100W x 95D x 95H cm
-2+2 SET — £500 (ID 22) | 3+1 SET — £520 (ID 23) | 3+3 SET — £620 (ID 24)
+SINGLE CHAIRS — £220 each (ALL have photos, IDs 21-25) | 100W x 95D x 95H cm:
+21. Roma Black Chair — black leather | 22. Roma Grey Chair — grey leather | 23. Roma Brown Chair — brown leather | 24. Rio Cord Grey Chair — grey cord | 25. Sorrento Grey Chair — grey fabric
+2+2 SET — £500 (ID 26) | 3+1 SET — £520 (ID 27) | 3+3 SET — £620 (ID 28)
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 SHOWING 3+3, 3+1, 2+2 SETS — VERY IMPORTANT:
@@ -278,7 +283,8 @@ PHOTO TRIGGERS:
 [SHOW_CORNER]   = 5 corner photos (IDs 6-10)
 [SHOW_3SEATERS] = 5 individual 3 seater photos (IDs 11-15)
 [SHOW_2SEATERS] = 5 individual 2 seater photos (IDs 16-20)
-[SHOW_ID:X]     = single photo for sofa X (1-20)
+[SHOW_CHAIRS]   = 5 single chair photos (IDs 21-25)
+[SHOW_ID:X]     = single photo for sofa X (1-25)
 
 MATERIAL KNOWLEDGE — never get this wrong:
 - Roma range = LEATHER (available in black, grey, brown)
@@ -394,6 +400,17 @@ async function handleMessage(event) {
       reply = reply.replace('[SHOW_2SEATERS]', '').trim();
       const twoSeaters = SOFAS_INDIVIDUAL.filter(s => s.type === '2seater');
       for (const sofa of twoSeaters) {
+        await sendImage(senderId, sofa.image);
+        await sleep(600);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
+        await sleep(400);
+      }
+    }
+    // ── [SHOW_CHAIRS] ─────────────────────────────────────────────────────
+    else if (reply.includes('[SHOW_CHAIRS]')) {
+      reply = reply.replace('[SHOW_CHAIRS]', '').trim();
+      const chairs = SOFAS_INDIVIDUAL.filter(s => s.type === 'chair');
+      for (const sofa of chairs) {
         await sendImage(senderId, sofa.image);
         await sleep(600);
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
