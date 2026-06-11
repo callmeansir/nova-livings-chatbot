@@ -44,6 +44,34 @@ async function sendOrderEmail(orderDetails) {
   }
 }
 
+// ── Live date/time helper ─────────────────────────────────────────────────────
+function getLiveDateContext() {
+  const now = new Date();
+  const ukTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/London' }));
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                  'July', 'August', 'September', 'October', 'November', 'December'];
+
+  const dayName = days[ukTime.getDay()];
+  const date = ukTime.getDate();
+  const month = months[ukTime.getMonth()];
+  const year = ukTime.getFullYear();
+
+  const tomorrow = new Date(ukTime);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowName = days[tomorrow.getDay()];
+  const tomorrowDate = `${tomorrow.getDate()} ${months[tomorrow.getMonth()]}`;
+
+  const dayAfter = new Date(ukTime);
+  dayAfter.setDate(dayAfter.getDate() + 2);
+  const dayAfterName = days[dayAfter.getDay()];
+  const dayAfterDate = `${dayAfter.getDate()} ${months[dayAfter.getMonth()]}`;
+
+  return `TODAY: ${dayName} ${date} ${month} ${year} (UK time)
+TOMORROW: ${tomorrowName} ${tomorrowDate}
+DAY AFTER TOMORROW: ${dayAfterName} ${dayAfterDate}`;
+}
+
 // ── Products ──────────────────────────────────────────────────────────────────
 
 const SOFAS_3_2 = [
@@ -63,15 +91,51 @@ const SOFAS_CORNER = [
 ];
 
 const SOFAS_INDIVIDUAL = [
-  { id: 11, name: '3 Seater Recliner',  type: '3seater', price: 350, image: null },
-  { id: 12, name: '2 Seater Recliner',  type: '2seater', price: 300, image: null },
-  { id: 13, name: 'Single Chair',       type: 'chair',   price: 220, image: null },
-  { id: 14, name: '2+2 Recliner Set',   type: '2+2',     price: 500, image: null },
-  { id: 15, name: '3+1 Recliner Set',   type: '3+1',     price: 520, image: null },
-  { id: 16, name: '3+3 Recliner Set',   type: '3+3',     price: 620, image: null },
+  // 3 Seaters
+  { id: 11, name: 'Roma Black 3 Seater',    type: '3seater', price: 350, image: `${G}/romablack3.jpeg` },
+  { id: 12, name: 'Roma Grey 3 Seater',     type: '3seater', price: 350, image: `${G}/romagrey3.jpeg` },
+  { id: 13, name: 'Roma Brown 3 Seater',    type: '3seater', price: 350, image: `${G}/romabrown3.jpeg` },
+  { id: 14, name: 'Rio Cord Grey 3 Seater', type: '3seater', price: 350, image: `${G}/rio3.jpeg` },
+  { id: 15, name: 'Sorrento Grey 3 Seater', type: '3seater', price: 350, image: `${G}/sorrento3.jpeg` },
+  // 2 Seaters
+  { id: 16, name: 'Roma Black 2 Seater',    type: '2seater', price: 300, image: `${G}/romablack2.jpeg` },
+  { id: 17, name: 'Roma Grey 2 Seater',     type: '2seater', price: 300, image: `${G}/romagrey2.jpeg` },
+  { id: 18, name: 'Roma Brown 2 Seater',    type: '2seater', price: 300, image: `${G}/romabrown2.jpeg` },
+  { id: 19, name: 'Rio Cord Grey 2 Seater', type: '2seater', price: 300, image: `${G}/rio2.jpeg` },
+  { id: 20, name: 'Sorrento Grey 2 Seater', type: '2seater', price: 300, image: `${G}/sorrento2.jpeg` },
+  // Chairs — photos coming soon
+  { id: 21, name: 'Single Chair',           type: 'chair',   price: 220, image: null },
+  // Sets
+  { id: 22, name: '2+2 Recliner Set',       type: '2+2',     price: 500, image: null },
+  { id: 23, name: '3+1 Recliner Set',       type: '3+1',     price: 520, image: null },
+  { id: 24, name: '3+3 Recliner Set',       type: '3+3',     price: 620, image: null },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER, ...SOFAS_INDIVIDUAL];
+
+// ── Greetings rotation ────────────────────────────────────────────────────────
+const GREETINGS = [
+  "Hey! 👋 Welcome to Nova Livings!",
+  "Hi there! 😊 Thanks for reaching out to Nova Livings!",
+  "Hello! Welcome to Nova Livings 😊",
+  "Hey, great to hear from you! 👋",
+  "Hi! Welcome to Nova Livings — lovely to have you here 😊"
+];
+function randomGreeting() {
+  return GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+}
+
+// ── Compliments rotation ──────────────────────────────────────────────────────
+const COMPLIMENTS = [
+  "Great choice! 😊",
+  "Lovely pick! That's one of our most popular! 😊",
+  "Excellent taste! 👌",
+  "Great taste — really popular one that! 😊",
+  "Nice choice! You'll love it 😊"
+];
+function randomCompliment() {
+  return COMPLIMENTS[Math.floor(Math.random() * COMPLIMENTS.length)];
+}
 
 // ── 24-hour reminder system ───────────────────────────────────────────────────
 const reminderTimers = {};
@@ -123,7 +187,18 @@ function isOrderConfirmed(text) {
 // ── System prompt ─────────────────────────────────────────────────────────────
 function buildSystemPrompt() {
   return `You are a friendly sales assistant for Nova Livings, a UK sofa business.
-Reply like a real human — warm, short, natural. No bullet points, no bold text, max 2-3 sentences.
+Reply like a real human — warm, short, natural. No bullet points, no bold text, max 2-3 sentences per message.
+
+${getLiveDateContext()}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+PERSONALITY RULES — make it feel human:
+- Vary your greetings — don't always say the same thing
+- Compliment customer choices naturally e.g. "Great taste! That's one of our most popular 😊"
+- Use customer's first name once you know it
+- If customer says something is expensive, empathise: "I totally understand — it's a big purchase! But the quality is brilliant and delivery is completely free 😊"
+- Split long info into 2-3 short messages rather than one big block
+- Never sound robotic or scripted
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 PRODUCTS & PRICES:
@@ -142,87 +217,89 @@ CORNER RECLINERS — £580 each (ALL have photos):
 9.  Rio Cord Corner      — grey cord fabric            | 230 x 230 cm, 95D x 95H cm
 10. Roma Black Corner    — black leather, cup holders | 230 x 230 cm, 95D x 95H cm
 
-INDIVIDUAL PIECES — no photos yet, text only:
-11. 3 Seater Recliner  — £350
-12. 2 Seater Recliner  — £300
-13. Single Chair        — £220
-14. 2+2 Recliner Set   — £500
-15. 3+1 Recliner Set   — £520
-16. 3+3 Recliner Set   — £620
+INDIVIDUAL 3 SEATERS — £350 each (ALL have photos):
+11. Roma Black 3 Seater    — black leather | 195W x 95D x 95H cm
+12. Roma Grey 3 Seater     — grey leather  | 195W x 95D x 95H cm
+13. Roma Brown 3 Seater    — brown leather | 195W x 95D x 95H cm
+14. Rio Cord Grey 3 Seater — grey cord     | 195W x 95D x 95H cm
+15. Sorrento Grey 3 Seater — grey fabric   | 195W x 95D x 95H cm
+
+INDIVIDUAL 2 SEATERS — £300 each (ALL have photos):
+16. Roma Black 2 Seater    — black leather | 145W x 95D x 95H cm
+17. Roma Grey 2 Seater     — grey leather  | 145W x 95D x 95H cm
+18. Roma Brown 2 Seater    — brown leather | 145W x 95D x 95H cm
+19. Rio Cord Grey 2 Seater — grey cord     | 145W x 95D x 95H cm
+20. Sorrento Grey 2 Seater — grey fabric   | 145W x 95D x 95H cm
+
+SINGLE CHAIR — £220 (photo coming soon): 100W x 95D x 95H cm
+OTHER SETS (no photos yet): 2+2 £500 | 3+1 £520 | 3+3 £620
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-PRICING COMBINATIONS — always add prices together:
-- Corner + Single Chair    = £580 + £220 = £800
-- Corner + 2 Seater        = £580 + £300 = £880
-- Corner + 3 Seater        = £580 + £350 = £930
-- 3+2 Set + extra 2 Seater = £550 + £300 = £850
-- 3+2 Set + extra 3 Seater = £550 + £350 = £900
-- 3+2 Set + extra Chair    = £550 + £220 = £770
-- Any other combination: simply add the individual prices together.
-
-When customer asks for a combination, calculate the total immediately and say:
-"That'll be £[total] in total with free delivery 😊 Shall I go ahead with the order?"
+PRICING COMBINATIONS — always add prices together instantly:
+- Corner + Chair    = £800 | Corner + 2 Seater = £880 | Corner + 3 Seater = £930
+- 3+2 + extra 2 Seater = £850 | 3+2 + extra 3 Seater = £900 | 3+2 + Chair = £770
+- Any other combo: just add the prices together.
+Say: "That'll be £[total] in total with free delivery 😊 Shall I go ahead with the order?"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-DELIVERY: Free UK delivery, 2-4 working days, free assembly included. We ring the day before with an exact time. Customer can request a specific day/date.
-PAYMENT: Cash on delivery. Bank transfer also accepted if customer asks.
+DELIVERY RULES:
+- Standard: free UK delivery, 2-4 working days, free assembly, ring day before with exact time.
+- If customer asks for ANY specific day (tomorrow, Saturday, next Monday, day after tomorrow etc): ALWAYS say yes. Never lose an order over delivery date. Say: "Yes of course! We can do [day] 😊 We'll give you a ring beforehand to confirm the exact time."
+- Never say no to a delivery date request.
+
+PAYMENT: Cash on delivery. Bank transfer also accepted.
 WHATSAPP: ${WHATSAPP}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-CONVERSATION FLOW — follow this EXACTLY:
+CONVERSATION FLOW:
 
-STEP 1 — FIRST MESSAGE / AD ARRIVAL:
+STEP 1 — FIRST MESSAGE:
 If customer says "can i make a purchase", "interested", or comes from an ad:
-→ Reply: [SHOW_ALL] then ask "Are you looking for a 3+2 set, a corner sofa, or individual pieces? 😊"
+→ [SHOW_ALL] then ask "Are you looking for a 3+2 set, a corner sofa, or individual pieces? 😊"
 
 STEP 2 — CUSTOMER PICKS TYPE:
-If customer says "3+2"        → Reply: [SHOW_3_2] then ask "Which one catches your eye? You can pick by number or name 😊"
-If customer says "corner"     → Reply: [SHOW_CORNER] then ask "Which one catches your eye? You can pick by number or name 😊"
-If customer says "individual" or asks about single pieces → list individual pieces with prices, ask what they need.
+- "3+2" → [SHOW_3_2] then "Which one catches your eye? Pick by number or name 😊"
+- "corner" → [SHOW_CORNER] then "Which one catches your eye? 😊"
+- "3 seater" / "individual" / "separate" → [SHOW_3SEATERS] then "Which colour do you prefer? 😊"
+- "2 seater" → [SHOW_2SEATERS] then "Which colour do you prefer? 😊"
 
-STEP 3 — CUSTOMER PICKS A SPECIFIC SOFA:
-Once customer mentions a specific sofa (e.g. "black corner", "number 10", "Rio Cord", "brown one", "number 4"):
-→ If ID is 1-10: ALWAYS send the photo using [SHOW_ID:X]. NEVER say the photo is unavailable. ALL IDs 1-10 have photos.
-→ If ID is 11-16: confirm name and price in text only, no photo trigger.
-→ Then confirm: "Great choice! The [name] is £[price] with free delivery 😊 Shall I go ahead and place your order?"
-→ Do NOT send group photos again at this point.
+STEP 3 — CUSTOMER PICKS SPECIFIC SOFA:
+- IDs 1-20: ALWAYS use [SHOW_ID:X] — ALL have photos. NEVER say photo unavailable for these.
+- IDs 21-24: text only, no photo.
+- Then: "[Compliment]! The [name] is £[price] with free delivery 😊 Shall I go ahead and place your order?"
 
-STEP 3b — CUSTOMER ASKS FOR PHOTO MID-CONVERSATION:
-If customer says "photo", "photo?", "send photo", "can I see it", "show me", "pic", "picture", "image" or any similar request:
-→ Look at the conversation history to find the last sofa being discussed.
-→ ALWAYS send [SHOW_ID:X] for that sofa immediately. Never reply with text only.
+STEP 3b — PHOTO REQUEST:
+If customer says "photo", "pic", "show me", "can I see it" → [SHOW_ID:X] for last sofa discussed. Always.
 
-STEP 3c — CUSTOMER ADDS EXTRA PIECES:
-If customer wants to add an extra piece to their order (e.g. "and a 2 seater", "plus a chair"):
-→ Add the prices together immediately.
-→ Say: "That'll be £[total] in total with free delivery 😊 Shall I go ahead with the order?"
+STEP 3c — EXTRA PIECES:
+Customer adds extra → add prices → "That'll be £[total] in total 😊 Shall I go ahead?"
 
 STEP 4 — ORDER COLLECTION:
-If customer says yes / ready to order:
 → Reply EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
 
 STEP 5 — ORDER CONFIRMED:
-Once customer provides their details (name, address, postcode, contact number):
 → Reply EXACTLY: "Perfect! Your order is confirmed. We'll be in touch to arrange delivery. Thank you for choosing Nova Livings! 👍"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-PHOTO TRIGGER REFERENCE:
-[SHOW_ALL]    = sends all 10 sofa photos (IDs 1-10)
-[SHOW_3_2]    = sends the 5 three+two photos (IDs 1-5)
-[SHOW_CORNER] = sends the 5 corner photos (IDs 6-10)
-[SHOW_ID:X]   = sends ONLY the photo for sofa number X
+PHOTO TRIGGERS:
+[SHOW_ALL]      = all 10 set/corner photos (IDs 1-10)
+[SHOW_3_2]      = 5 three+two set photos (IDs 1-5)
+[SHOW_CORNER]   = 5 corner photos (IDs 6-10)
+[SHOW_3SEATERS] = 5 individual 3 seater photos (IDs 11-15)
+[SHOW_2SEATERS] = 5 individual 2 seater photos (IDs 16-20)
+[SHOW_ID:X]     = single photo for sofa X
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 CRITICAL RULES:
-- IDs 1-10 ALL have photos. ALWAYS use [SHOW_ID:X] for any of these. NEVER say "photos not available" or "photos coming soon" for IDs 1-10. This includes Rio Cord (IDs 4 and 9).
-- ONLY IDs 11-16 have no photos. Never use photo triggers for these.
-- If customer says "photo", "pic", "show me", "can I see it" — always send [SHOW_ID:X] for the last sofa discussed.
-- Never send group photos again after customer has picked a specific sofa.
-- If customer asks about delivery, price, payment or dimensions mid-flow, answer briefly then return to the flow.
-- If unsure which sofa they mean, ask one clarifying question only.`;
+- IDs 1-20 ALL have photos. ALWAYS use [SHOW_ID:X]. NEVER say unavailable for 1-20.
+- IDs 21-24 no photos yet.
+- Never re-send group photos after customer picked a specific sofa.
+- Always say YES to any delivery date.
+- If customer says price is too much, empathise and mention free delivery + quality.
+- Use customer name once you know it.`;
 }
 
-// ── Webhook verification ──────────────────────────────────────────────────────
+// ── Webhook ───────────────────────────────────────────────────────────────────
 app.get('/webhook', (req, res) => {
   if (req.query['hub.mode'] === 'subscribe' && req.query['hub.verify_token'] === VERIFY_TOKEN) {
     res.status(200).send(req.query['hub.challenge']);
@@ -231,7 +308,6 @@ app.get('/webhook', (req, res) => {
   }
 });
 
-// ── Incoming messages ─────────────────────────────────────────────────────────
 app.post('/webhook', async (req, res) => {
   res.sendStatus(200);
   const body = req.body;
@@ -269,13 +345,14 @@ async function handleMessage(event) {
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 400,
+      max_tokens: 500,
       system: buildSystemPrompt(),
       messages: conversations[senderId]
     });
 
     let reply = response.content[0].text;
 
+    // ── [SHOW_ALL] ────────────────────────────────────────────────────────
     if (reply.includes('[SHOW_ALL]')) {
       reply = reply.replace('[SHOW_ALL]', '').trim();
       for (const sofa of [...SOFAS_3_2, ...SOFAS_CORNER]) {
@@ -284,7 +361,9 @@ async function handleMessage(event) {
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
         await sleep(400);
       }
-    } else if (reply.includes('[SHOW_3_2]')) {
+    }
+    // ── [SHOW_3_2] ────────────────────────────────────────────────────────
+    else if (reply.includes('[SHOW_3_2]')) {
       reply = reply.replace('[SHOW_3_2]', '').trim();
       for (const sofa of SOFAS_3_2) {
         await sendImage(senderId, sofa.image);
@@ -292,7 +371,9 @@ async function handleMessage(event) {
         await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
         await sleep(400);
       }
-    } else if (reply.includes('[SHOW_CORNER]')) {
+    }
+    // ── [SHOW_CORNER] ─────────────────────────────────────────────────────
+    else if (reply.includes('[SHOW_CORNER]')) {
       reply = reply.replace('[SHOW_CORNER]', '').trim();
       for (const sofa of SOFAS_CORNER) {
         await sendImage(senderId, sofa.image);
@@ -301,7 +382,30 @@ async function handleMessage(event) {
         await sleep(400);
       }
     }
+    // ── [SHOW_3SEATERS] ───────────────────────────────────────────────────
+    else if (reply.includes('[SHOW_3SEATERS]')) {
+      reply = reply.replace('[SHOW_3SEATERS]', '').trim();
+      const threeSeaters = SOFAS_INDIVIDUAL.filter(s => s.type === '3seater');
+      for (const sofa of threeSeaters) {
+        await sendImage(senderId, sofa.image);
+        await sleep(600);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
+        await sleep(400);
+      }
+    }
+    // ── [SHOW_2SEATERS] ───────────────────────────────────────────────────
+    else if (reply.includes('[SHOW_2SEATERS]')) {
+      reply = reply.replace('[SHOW_2SEATERS]', '').trim();
+      const twoSeaters = SOFAS_INDIVIDUAL.filter(s => s.type === '2seater');
+      for (const sofa of twoSeaters) {
+        await sendImage(senderId, sofa.image);
+        await sleep(600);
+        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
+        await sleep(400);
+      }
+    }
 
+    // ── [SHOW_ID:X] ───────────────────────────────────────────────────────
     const showIdMatch = reply.match(/\[SHOW_ID:(\d+)\]/);
     if (showIdMatch) {
       const sofaId = parseInt(showIdMatch[1]);
@@ -318,7 +422,7 @@ async function handleMessage(event) {
     conversations[senderId].push({ role: 'assistant', content: reply });
     if (reply) await sendMessage(senderId, reply);
 
-    // ── Send order notification email ─────────────────────────────────────
+    // ── Order email ───────────────────────────────────────────────────────
     if (isOrderConfirmed(reply)) {
       const recentMessages = conversations[senderId].slice(-6);
       const orderDetails = recentMessages
@@ -330,7 +434,7 @@ async function handleMessage(event) {
 
   } catch (error) {
     console.error('Error:', error.message);
-    await sendMessage(senderId, `Sorry about that! Message us directly on WhatsApp and we'll sort you out straight away — ${WHATSAPP} 👍`);
+    await sendMessage(senderId, `Sorry about that! Message us directly on WhatsApp and we'll sort you out — ${WHATSAPP} 👍`);
   }
 }
 
