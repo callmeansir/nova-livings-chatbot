@@ -92,49 +92,30 @@ const SOFAS_CORNER = [
 
 const SOFAS_INDIVIDUAL = [
   // 3 Seaters
-  { id: 11, name: 'Roma Black 3 Seater',    type: '3seater', price: 350, image: `${G}/romablack3.jpeg` },
-  { id: 12, name: 'Roma Grey 3 Seater',     type: '3seater', price: 350, image: `${G}/romagrey3.jpeg` },
-  { id: 13, name: 'Roma Brown 3 Seater',    type: '3seater', price: 350, image: `${G}/romabrown3.jpeg` },
-  { id: 14, name: 'Rio Cord Grey 3 Seater', type: '3seater', price: 350, image: `${G}/rio3.jpeg` },
-  { id: 15, name: 'Sorrento Grey 3 Seater', type: '3seater', price: 350, image: `${G}/sorrento3.jpeg` },
+  { id: 11, name: 'Roma Black 3 Seater',    type: '3seater', colour: 'black', price: 350, image: `${G}/romablack3.jpeg` },
+  { id: 12, name: 'Roma Grey 3 Seater',     type: '3seater', colour: 'grey',  price: 350, image: `${G}/romagrey3.jpeg` },
+  { id: 13, name: 'Roma Brown 3 Seater',    type: '3seater', colour: 'brown', price: 350, image: `${G}/romabrown3.jpeg` },
+  { id: 14, name: 'Rio Cord Grey 3 Seater', type: '3seater', colour: 'grey',  price: 350, image: `${G}/rio3.jpeg` },
+  { id: 15, name: 'Sorrento Grey 3 Seater', type: '3seater', colour: 'grey',  price: 350, image: `${G}/sorrento3.jpeg` },
   // 2 Seaters
-  { id: 16, name: 'Roma Black 2 Seater',    type: '2seater', price: 300, image: `${G}/romablack2.jpeg` },
-  { id: 17, name: 'Roma Grey 2 Seater',     type: '2seater', price: 300, image: `${G}/romagrey2.jpeg` },
-  { id: 18, name: 'Roma Brown 2 Seater',    type: '2seater', price: 300, image: `${G}/romabrown2.jpeg` },
-  { id: 19, name: 'Rio Cord Grey 2 Seater', type: '2seater', price: 300, image: `${G}/rio2.jpeg` },
-  { id: 20, name: 'Sorrento Grey 2 Seater', type: '2seater', price: 300, image: `${G}/sorrento2.jpeg` },
+  { id: 16, name: 'Roma Black 2 Seater',    type: '2seater', colour: 'black', price: 300, image: `${G}/romablack2.jpeg` },
+  { id: 17, name: 'Roma Grey 2 Seater',     type: '2seater', colour: 'grey',  price: 300, image: `${G}/romagrey2.jpeg` },
+  { id: 18, name: 'Roma Brown 2 Seater',    type: '2seater', colour: 'brown', price: 300, image: `${G}/romabrown2.jpeg` },
+  { id: 19, name: 'Rio Cord Grey 2 Seater', type: '2seater', colour: 'grey',  price: 300, image: `${G}/rio2.jpeg` },
+  { id: 20, name: 'Sorrento Grey 2 Seater', type: '2seater', colour: 'grey',  price: 300, image: `${G}/sorrento2.jpeg` },
   // Chairs — photos coming soon
-  { id: 21, name: 'Single Chair',           type: 'chair',   price: 220, image: null },
+  { id: 21, name: 'Single Chair',           type: 'chair',   colour: null,    price: 220, image: null },
   // Sets
-  { id: 22, name: '2+2 Recliner Set',       type: '2+2',     price: 500, image: null },
-  { id: 23, name: '3+1 Recliner Set',       type: '3+1',     price: 520, image: null },
-  { id: 24, name: '3+3 Recliner Set',       type: '3+3',     price: 620, image: null },
+  { id: 22, name: '2+2 Recliner Set',       type: '2+2',     colour: null,    price: 500, image: null },
+  { id: 23, name: '3+1 Recliner Set',       type: '3+1',     colour: null,    price: 520, image: null },
+  { id: 24, name: '3+3 Recliner Set',       type: '3+3',     colour: null,    price: 620, image: null },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER, ...SOFAS_INDIVIDUAL];
 
-// ── Greetings rotation ────────────────────────────────────────────────────────
-const GREETINGS = [
-  "Hey! 👋 Welcome to Nova Livings!",
-  "Hi there! 😊 Thanks for reaching out to Nova Livings!",
-  "Hello! Welcome to Nova Livings 😊",
-  "Hey, great to hear from you! 👋",
-  "Hi! Welcome to Nova Livings — lovely to have you here 😊"
-];
-function randomGreeting() {
-  return GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
-}
-
-// ── Compliments rotation ──────────────────────────────────────────────────────
-const COMPLIMENTS = [
-  "Great choice! 😊",
-  "Lovely pick! That's one of our most popular! 😊",
-  "Excellent taste! 👌",
-  "Great taste — really popular one that! 😊",
-  "Nice choice! You'll love it 😊"
-];
-function randomCompliment() {
-  return COMPLIMENTS[Math.floor(Math.random() * COMPLIMENTS.length)];
+// ── Helper: find matching 3 seater or 2 seater by colour ─────────────────────
+function findMatchingIndividual(type, colour) {
+  return SOFAS_INDIVIDUAL.find(s => s.type === type && (!colour || s.colour === colour));
 }
 
 // ── 24-hour reminder system ───────────────────────────────────────────────────
@@ -168,14 +149,12 @@ function scheduleReminder(senderId) {
     );
     delete reminderTimers[senderId];
   }, REMINDER_DELAY_MS);
-  console.log(`Reminder scheduled for ${senderId} in 24 hours`);
 }
 
 function cancelReminder(senderId) {
   if (reminderTimers[senderId]) {
     clearTimeout(reminderTimers[senderId]);
     delete reminderTimers[senderId];
-    console.log(`Reminder cancelled for ${senderId} — customer came back`);
   }
 }
 
@@ -192,60 +171,58 @@ Reply like a real human — warm, short, natural. No bullet points, no bold text
 ${getLiveDateContext()}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-PERSONALITY RULES — make it feel human:
+PERSONALITY RULES:
 - Vary your greetings — don't always say the same thing
 - Compliment customer choices naturally e.g. "Great taste! That's one of our most popular 😊"
 - Use customer's first name once you know it
 - If customer says something is expensive, empathise: "I totally understand — it's a big purchase! But the quality is brilliant and delivery is completely free 😊"
-- Split long info into 2-3 short messages rather than one big block
 - Never sound robotic or scripted
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 PRODUCTS & PRICES:
 
-3+2 RECLINER SETS — £550 each (ALL have photos):
-1. Roma Black 3+2     — black leather, cup holders | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
-2. Roma Grey 3+2      — grey leather, cup holders  | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
-3. Roma Brown 3+2     — brown leather, cup holders | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
-4. Rio Cord Grey 3+2  — grey cord fabric            | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
-5. Sorrento Grey 3+2  — grey fabric, cup holders   | 3 seater: 195W x 95D x 95H cm | 2 seater: 145W x 95D x 95H cm
+3+2 RECLINER SETS — £550 (ALL have photos, IDs 1-5):
+1. Roma Black 3+2  | 2. Roma Grey 3+2  | 3. Roma Brown 3+2  | 4. Rio Cord Grey 3+2  | 5. Sorrento Grey 3+2
+Dimensions: 3 seater 195W x 95D x 95H cm | 2 seater 145W x 95D x 95H cm
 
-CORNER RECLINERS — £580 each (ALL have photos):
-6.  Roma Brown Corner    — brown leather, cup holders | 230 x 230 cm, 95D x 95H cm
-7.  Sorrento Grey Corner — grey fabric, cup holders   | 230 x 230 cm, 95D x 95H cm
-8.  Roma Grey Corner     — grey leather, cup holders  | 230 x 230 cm, 95D x 95H cm
-9.  Rio Cord Corner      — grey cord fabric            | 230 x 230 cm, 95D x 95H cm
-10. Roma Black Corner    — black leather, cup holders | 230 x 230 cm, 95D x 95H cm
+CORNER RECLINERS — £580 (ALL have photos, IDs 6-10):
+6. Roma Brown Corner | 7. Sorrento Grey Corner | 8. Roma Grey Corner | 9. Rio Cord Corner | 10. Roma Black Corner
+Dimensions: 230 x 230 cm, 95D x 95H cm
 
-INDIVIDUAL 3 SEATERS — £350 each (ALL have photos):
-11. Roma Black 3 Seater    — black leather | 195W x 95D x 95H cm
-12. Roma Grey 3 Seater     — grey leather  | 195W x 95D x 95H cm
-13. Roma Brown 3 Seater    — brown leather | 195W x 95D x 95H cm
-14. Rio Cord Grey 3 Seater — grey cord     | 195W x 95D x 95H cm
-15. Sorrento Grey 3 Seater — grey fabric   | 195W x 95D x 95H cm
+INDIVIDUAL 3 SEATERS — £350 (ALL have photos, IDs 11-15):
+11. Roma Black 3 Seater | 12. Roma Grey 3 Seater | 13. Roma Brown 3 Seater | 14. Rio Cord Grey 3 Seater | 15. Sorrento Grey 3 Seater
+Dimensions: 195W x 95D x 95H cm
 
-INDIVIDUAL 2 SEATERS — £300 each (ALL have photos):
-16. Roma Black 2 Seater    — black leather | 145W x 95D x 95H cm
-17. Roma Grey 2 Seater     — grey leather  | 145W x 95D x 95H cm
-18. Roma Brown 2 Seater    — brown leather | 145W x 95D x 95H cm
-19. Rio Cord Grey 2 Seater — grey cord     | 145W x 95D x 95H cm
-20. Sorrento Grey 2 Seater — grey fabric   | 145W x 95D x 95H cm
+INDIVIDUAL 2 SEATERS — £300 (ALL have photos, IDs 16-20):
+16. Roma Black 2 Seater | 17. Roma Grey 2 Seater | 18. Roma Brown 2 Seater | 19. Rio Cord Grey 2 Seater | 20. Sorrento Grey 2 Seater
+Dimensions: 145W x 95D x 95H cm
 
-SINGLE CHAIR — £220 (photo coming soon): 100W x 95D x 95H cm
-OTHER SETS (no photos yet): 2+2 £500 | 3+1 £520 | 3+3 £620
+SINGLE CHAIR — £220 (ID 21) | 100W x 95D x 95H cm
+2+2 SET — £500 (ID 22) | 3+1 SET — £520 (ID 23) | 3+3 SET — £620 (ID 24)
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-PRICING COMBINATIONS — always add prices together instantly:
-- Corner + Chair    = £800 | Corner + 2 Seater = £880 | Corner + 3 Seater = £930
+SHOWING 3+3, 3+1, 2+2 SETS — VERY IMPORTANT:
+When customer asks about 3+3, 3+1, or 2+2 sets, DO NOT say we have no photos.
+Instead show them the matching individual pieces and explain:
+
+For 3+3 (£620): Send [SHOW_ID:X] for the matching 3 seater and say "Here's what the 3 seater looks like — the 3+3 set would be two of these together 😊 Total £620 with free delivery."
+For 3+1 (£520): Send [SHOW_ID:X] for matching 3 seater and say "Here's the 3 seater — the 3+1 set comes with this plus a matching single chair 😊 Total £520 with free delivery."
+For 2+2 (£500): Send [SHOW_ID:X] for matching 2 seater and say "Here's the 2 seater — the 2+2 set would be two of these together 😊 Total £500 with free delivery."
+
+If customer hasn't specified colour, ask "Which colour were you thinking? We have black, grey, or brown 😊" then show matching photo.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+PRICING COMBINATIONS:
+- Corner + Chair = £800 | Corner + 2 Seater = £880 | Corner + 3 Seater = £930
 - 3+2 + extra 2 Seater = £850 | 3+2 + extra 3 Seater = £900 | 3+2 + Chair = £770
-- Any other combo: just add the prices together.
+- Any other combo: add prices together.
 Say: "That'll be £[total] in total with free delivery 😊 Shall I go ahead with the order?"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-DELIVERY RULES:
+DELIVERY:
 - Standard: free UK delivery, 2-4 working days, free assembly, ring day before with exact time.
-- If customer asks for ANY specific day (tomorrow, Saturday, next Monday, day after tomorrow etc): ALWAYS say yes. Never lose an order over delivery date. Say: "Yes of course! We can do [day] 😊 We'll give you a ring beforehand to confirm the exact time."
-- Never say no to a delivery date request.
+- Customer asks for ANY specific day (tomorrow, Saturday, next Monday etc): ALWAYS say yes. Never lose an order over a delivery date.
+- Say: "Yes of course! We can do [day] 😊 We'll give you a ring beforehand to confirm the exact time."
 
 PAYMENT: Cash on delivery. Bank transfer also accepted.
 WHATSAPP: ${WHATSAPP}
@@ -254,49 +231,47 @@ WHATSAPP: ${WHATSAPP}
 CONVERSATION FLOW:
 
 STEP 1 — FIRST MESSAGE:
-If customer says "can i make a purchase", "interested", or comes from an ad:
-→ [SHOW_ALL] then ask "Are you looking for a 3+2 set, a corner sofa, or individual pieces? 😊"
+"can i make a purchase" / "interested" / ad → [SHOW_ALL] then "Are you looking for a 3+2 set, corner sofa, or individual pieces? 😊"
 
-STEP 2 — CUSTOMER PICKS TYPE:
-- "3+2" → [SHOW_3_2] then "Which one catches your eye? Pick by number or name 😊"
+STEP 2 — TYPE SELECTION:
+- "3+2" → [SHOW_3_2] then "Which one catches your eye? 😊"
 - "corner" → [SHOW_CORNER] then "Which one catches your eye? 😊"
-- "3 seater" / "individual" / "separate" → [SHOW_3SEATERS] then "Which colour do you prefer? 😊"
-- "2 seater" → [SHOW_2SEATERS] then "Which colour do you prefer? 😊"
+- "3 seater" / "individual" → [SHOW_3SEATERS] then "Which colour do you prefer? 😊"
+- "2 seater" → [SHOW_2SEATERS] then "Which colour? 😊"
+- "3+3" / "3+1" / "2+2" → ask colour if not given, then show matching piece photo with explanation above
 
-STEP 3 — CUSTOMER PICKS SPECIFIC SOFA:
-- IDs 1-20: ALWAYS use [SHOW_ID:X] — ALL have photos. NEVER say photo unavailable for these.
-- IDs 21-24: text only, no photo.
+STEP 3 — SPECIFIC SOFA SELECTED:
+- IDs 1-20: ALWAYS [SHOW_ID:X] — ALL have photos. NEVER say photo unavailable.
+- IDs 21-24: use matching piece photo as described above, never say no photos.
 - Then: "[Compliment]! The [name] is £[price] with free delivery 😊 Shall I go ahead and place your order?"
 
 STEP 3b — PHOTO REQUEST:
-If customer says "photo", "pic", "show me", "can I see it" → [SHOW_ID:X] for last sofa discussed. Always.
+"photo" / "pic" / "show me" / "can I see" → [SHOW_ID:X] for last sofa discussed. Always.
 
 STEP 3c — EXTRA PIECES:
-Customer adds extra → add prices → "That'll be £[total] in total 😊 Shall I go ahead?"
+Add prices → "That'll be £[total] in total 😊 Shall I go ahead?"
 
 STEP 4 — ORDER COLLECTION:
-→ Reply EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
+→ EXACTLY: "To place your order, please provide the following:\n\nFull Name\nFull Delivery Address\nPostcode\nContact Number\n\nThank you 😊"
 
 STEP 5 — ORDER CONFIRMED:
-→ Reply EXACTLY: "Perfect! Your order is confirmed. We'll be in touch to arrange delivery. Thank you for choosing Nova Livings! 👍"
+→ EXACTLY: "Perfect! Your order is confirmed. We'll be in touch to arrange delivery. Thank you for choosing Nova Livings! 👍"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 PHOTO TRIGGERS:
 [SHOW_ALL]      = all 10 set/corner photos (IDs 1-10)
-[SHOW_3_2]      = 5 three+two set photos (IDs 1-5)
+[SHOW_3_2]      = 5 three+two photos (IDs 1-5)
 [SHOW_CORNER]   = 5 corner photos (IDs 6-10)
 [SHOW_3SEATERS] = 5 individual 3 seater photos (IDs 11-15)
 [SHOW_2SEATERS] = 5 individual 2 seater photos (IDs 16-20)
-[SHOW_ID:X]     = single photo for sofa X
+[SHOW_ID:X]     = single photo for sofa X (1-20)
 
-━━━━━━━━━━━━━━━━━━━━━━━
-CRITICAL RULES:
-- IDs 1-20 ALL have photos. ALWAYS use [SHOW_ID:X]. NEVER say unavailable for 1-20.
-- IDs 21-24 no photos yet.
-- Never re-send group photos after customer picked a specific sofa.
+CRITICAL:
+- NEVER say "we don't have photos" for any product. Always show the closest matching photo.
+- For 3+3/3+1/2+2: show the matching piece photo and explain what the set looks like.
 - Always say YES to any delivery date.
-- If customer says price is too much, empathise and mention free delivery + quality.
-- Use customer name once you know it.`;
+- Never re-send group photos after specific sofa picked.
+- Use customer name once known.`;
 }
 
 // ── Webhook ───────────────────────────────────────────────────────────────────
@@ -406,11 +381,11 @@ async function handleMessage(event) {
     }
 
     // ── [SHOW_ID:X] ───────────────────────────────────────────────────────
-    const showIdMatch = reply.match(/\[SHOW_ID:(\d+)\]/);
-    if (showIdMatch) {
-      const sofaId = parseInt(showIdMatch[1]);
+    // Handle multiple SHOW_ID triggers in one reply (e.g. for 3+3 showing two pieces)
+    const showIdMatches = [...reply.matchAll(/\[SHOW_ID:(\d+)\]/g)];
+    for (const match of showIdMatches) {
+      const sofaId = parseInt(match[1]);
       const sofa = ALL_SOFAS.find(s => s.id === sofaId);
-      reply = reply.replace(/\[SHOW_ID:\d+\]/, '').trim();
       if (sofa && sofa.image) {
         await sendImage(senderId, sofa.image);
         await sleep(600);
@@ -418,6 +393,7 @@ async function handleMessage(event) {
         await sleep(400);
       }
     }
+    reply = reply.replace(/\[SHOW_ID:\d+\]/g, '').trim();
 
     conversations[senderId].push({ role: 'assistant', content: reply });
     if (reply) await sendMessage(senderId, reply);
