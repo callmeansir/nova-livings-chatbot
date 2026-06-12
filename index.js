@@ -324,11 +324,30 @@ app.post('/webhook', async (req, res) => {
 });
 
 const conversations = {};
+const pausedChats = new Set(); // customers where bot is paused
 
 async function handleMessage(event) {
   const senderId = event.sender.id;
   const messageText = event.message?.text;
   if (!messageText) return;
+
+  // ── Pause / Resume detection ─────────────────────────────────────────
+  if (messageText.trim().toLowerCase() === 'dear') {
+    pausedChats.add(senderId);
+    console.log(`Bot paused for ${senderId}`);
+    return;
+  }
+  if (messageText.trim().toLowerCase() === 'boss') {
+    pausedChats.delete(senderId);
+    console.log(`Bot resumed for ${senderId}`);
+    return;
+  }
+
+  // If bot is paused for this customer, do nothing
+  if (pausedChats.has(senderId)) {
+    console.log(`Bot is paused for ${senderId} — skipping`);
+    return;
+  }
 
   cancelReminder(senderId);
 
@@ -359,9 +378,7 @@ async function handleMessage(event) {
       reply = reply.replace('[SHOW_ALL]', '').trim();
       for (const sofa of [...SOFAS_3_2, ...SOFAS_CORNER]) {
         await sendImage(senderId, sofa.image);
-        await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
-        await sleep(400);
+        await sleep(300);
       }
     }
     // ── [SHOW_3_2] ────────────────────────────────────────────────────────
@@ -369,9 +386,7 @@ async function handleMessage(event) {
       reply = reply.replace('[SHOW_3_2]', '').trim();
       for (const sofa of SOFAS_3_2) {
         await sendImage(senderId, sofa.image);
-        await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
-        await sleep(400);
+        await sleep(300);
       }
     }
     // ── [SHOW_CORNER] ─────────────────────────────────────────────────────
@@ -379,9 +394,7 @@ async function handleMessage(event) {
       reply = reply.replace('[SHOW_CORNER]', '').trim();
       for (const sofa of SOFAS_CORNER) {
         await sendImage(senderId, sofa.image);
-        await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
-        await sleep(400);
+        await sleep(300);
       }
     }
     // ── [SHOW_3SEATERS] ───────────────────────────────────────────────────
@@ -390,9 +403,7 @@ async function handleMessage(event) {
       const threeSeaters = SOFAS_INDIVIDUAL.filter(s => s.type === '3seater');
       for (const sofa of threeSeaters) {
         await sendImage(senderId, sofa.image);
-        await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
-        await sleep(400);
+        await sleep(300);
       }
     }
     // ── [SHOW_2SEATERS] ───────────────────────────────────────────────────
@@ -401,9 +412,7 @@ async function handleMessage(event) {
       const twoSeaters = SOFAS_INDIVIDUAL.filter(s => s.type === '2seater');
       for (const sofa of twoSeaters) {
         await sendImage(senderId, sofa.image);
-        await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
-        await sleep(400);
+        await sleep(300);
       }
     }
     // ── [SHOW_CHAIRS] ─────────────────────────────────────────────────────
@@ -412,9 +421,7 @@ async function handleMessage(event) {
       const chairs = SOFAS_INDIVIDUAL.filter(s => s.type === 'chair');
       for (const sofa of chairs) {
         await sendImage(senderId, sofa.image);
-        await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
-        await sleep(400);
+        await sleep(300);
       }
     }
 
@@ -426,9 +433,7 @@ async function handleMessage(event) {
       const sofa = ALL_SOFAS.find(s => s.id === sofaId);
       if (sofa && sofa.image) {
         await sendImage(senderId, sofa.image);
-        await sleep(600);
-        await sendMessage(senderId, `${sofa.id}. ${sofa.name} — £${sofa.price}`);
-        await sleep(400);
+        await sleep(300);
       }
     }
     reply = reply.replace(/\[SHOW_ID:\d+\]/g, '').trim();
