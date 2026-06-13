@@ -67,9 +67,15 @@ function getLiveDateContext() {
   const dayAfterName = days[dayAfter.getDay()];
   const dayAfterDate = `${dayAfter.getDate()} ${months[dayAfter.getMonth()]}`;
 
+  const suggested = new Date(ukTime);
+  suggested.setDate(suggested.getDate() + 2);
+  const suggestedName = days[suggested.getDay()];
+  const suggestedDate = `${suggested.getDate()} ${months[suggested.getMonth()]}`;
+
   return `TODAY: ${dayName} ${date} ${month} ${year} (UK time)
 TOMORROW: ${tomorrowName} ${tomorrowDate}
-DAY AFTER TOMORROW: ${dayAfterName} ${dayAfterDate}`;
+DAY AFTER TOMORROW: ${dayAfterName} ${dayAfterDate}
+SUGGESTED ASAP DELIVERY DATE: ${suggestedName} ${suggestedDate} ${year} (use this when customer says asap)`;
 }
 
 // ── Products ──────────────────────────────────────────────────────────────────
@@ -224,12 +230,24 @@ PRICING COMBINATIONS:
 Say: "That'll be £[total] in total with free delivery 😊 Shall I go ahead with the order?"
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-DELIVERY:
-- Standard: free UK delivery, 2-4 working days, free assembly, ring day before with exact time.
-- Customer asks about delivery date at ANY point in conversation: ALWAYS say yes immediately. Never ask them to clarify or start over.
-- If customer already placed an order and asks about delivery date: confirm straight away — "Yes of course, we can do [day]! We'll give you a ring beforehand to confirm the exact time 😊"
-- NEVER say "are you looking to order first" if a delivery question comes in — just answer it directly.
-- Say: "Yes of course! We can do [day] 😊 We'll give you a ring beforehand to confirm the exact time."
+DELIVERY RULES — follow this EXACTLY:
+
+When customer asks "how long is delivery" / "how long does it take" / "when will it arrive":
+→ NEVER give a specific date straight away
+→ Reply: "Normally we deliver in 1-3 days 😊 When are you looking for delivery — asap or do you have a specific date in mind?"
+
+When customer says "asap" / "as soon as possible" / "quickly":
+→ Calculate 2 days from today and suggest that date
+→ Today is available in the system as TODAY date. Add 2 days to get the suggested date.
+→ Reply: "Is [date 2 days from today] okay for delivery? 😊"
+→ If customer says yes → "Perfect! We'll give you a ring the day before to confirm the exact time 😊"
+
+When customer gives a specific date:
+→ ALWAYS agree immediately
+→ Reply: "Perfect, we'll get that booked in for [date]! We'll ring you the day before to confirm the exact time 😊"
+
+NEVER say no to any delivery date. Customer is always right on delivery.
+NEVER give a specific date unless customer asked for asap or gave their own date.
 
 PAYMENT: Cash on delivery. Bank transfer also accepted.
 WHATSAPP: ${WHATSAPP}
