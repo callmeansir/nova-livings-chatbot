@@ -149,23 +149,22 @@ function findMatchingIndividual(type, colour) {
 // ── 24-hour reminder system ───────────────────────────────────────────────────
 const reminderTimers = {};
 
-const HESITATION_PHRASES = [
-  "i'll get back to you", "ill get back to you",
-  "let me think", "i'll think about it", "ill think about it",
-  "i'll check with my wife", "i'll check with my husband", "i'll check with my partner",
-  "ill check with my wife", "ill check with my husband", "ill check with my partner",
-  "maybe later", "not sure yet",
-  "i'll decide later", "ill decide later",
-  "let me check", "i'll come back to you", "ill come back to you",
-  "i'll message you later", "ill message you later",
-  "busy right now", "i'm busy"
-];
-
 const REMINDER_DELAY_MS = 24 * 60 * 60 * 1000;
 
-function checkHesitation(text) {
+// Phrases that indicate the customer named a SPECIFIC day/date they'll be back —
+// in these cases we do NOT send a 24hr reminder, since they've told us when to expect them.
+const SPECIFIC_DATE_PHRASES = [
+  'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
+  'tomorrow', 'next week', 'next month', 'this weekend', 'weekend',
+  'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+];
+
+function hasSpecificDate(text) {
   const lower = text.toLowerCase();
-  return HESITATION_PHRASES.some(phrase => lower.includes(phrase));
+  if (SPECIFIC_DATE_PHRASES.some(phrase => lower.includes(phrase))) return true;
+  // matches things like "the 20th", "on 5th", "21st june" etc.
+  if (/\b\d{1,2}(st|nd|rd|th)\b/.test(lower)) return true;
+  return false;
 }
 
 function scheduleReminder(senderId) {
@@ -447,7 +446,9 @@ async function handleMessage(event) {
     conversations[senderId] = conversations[senderId].slice(-30);
   }
 
-  if (checkHesitation(messageText)) {
+  // Schedule a 24hr follow-up for any open conversation, unless the customer
+  // gave a specific day/date they'll be back — in that case trust them and don't chase.
+  if (!hasSpecificDate(messageText)) {
     scheduleReminder(senderId);
   }
 
