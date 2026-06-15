@@ -133,6 +133,10 @@ const SOFAS_INDIVIDUAL = [
   { id: 36, name: 'Roma Black Electric Corner',    type: 'electriccorner', colour: 'black', price: 699, image: `${G}/blackecorner.jpeg` },
   { id: 37, name: 'Roma Grey Electric Corner',     type: 'electriccorner', colour: 'grey',  price: 699, image: `${G}/greyecorner.jpeg` },
   { id: 38, name: 'Sorrento Grey Electric Corner', type: 'electriccorner', colour: 'grey',  price: 699, image: `${G}/sorrentoecorner.jpeg` },
+  // Electric 3+2 Recliner Sets — £699 (with LED lighting and USB ports)
+  { id: 39, name: 'Roma Black Electric 3+2',    type: 'electric32', colour: 'black', price: 699, image: `${G}/blacke32.jpeg` },
+  { id: 40, name: 'Roma Grey Electric 3+2',     type: 'electric32', colour: 'grey',  price: 699, image: `${G}/romae32.jpeg` },
+  { id: 41, name: 'Sorrento Grey Electric 3+2', type: 'electric32', colour: 'grey',  price: 699, image: `${G}/sorrentoe32.jpeg` },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER, ...SOFAS_INDIVIDUAL];
@@ -372,11 +376,13 @@ PHOTO TRIGGERS:
 [SHOW_3SEATERS] = 5 individual 3 seater photos (IDs 11-15)
 [SHOW_2SEATERS] = 5 individual 2 seater photos (IDs 16-20)
 [SHOW_CHAIRS]   = 5 single chair photos (IDs 21-25)
-[SHOW_ELECTRIC] = 3 electric corner recliner photos (IDs 36-38)
-[SHOW_ID:X]     = single photo for sofa X (1-38)
+[SHOW_ELECTRIC] = all 6 electric range photos (IDs 36-41) — use when shape not specified
+[SHOW_ELECTRIC_CORNER] = 3 electric corner photos (IDs 36-38)
+[SHOW_ELECTRIC_32]     = 3 electric 3+2 photos (IDs 39-41)
+[SHOW_ID:X]     = single photo for sofa X (1-41)
 
 CRITICAL:
-- IDs 1-25 and 36-38 ALL have photos for every listed colour. ALWAYS use [SHOW_ID:X]. NEVER say photo unavailable.
+- IDs 1-25 and 36-41 ALL have photos for every listed colour. ALWAYS use [SHOW_ID:X]. NEVER say photo unavailable.
 - IDs 26-35 have dedicated photos ONLY for the specific colours shown in MULTI-PIECE SETS. For those colours use [SHOW_ID:X] with that ID. For other colours, use [SHOW_ID:X] with the matching 3 seater or 2 seater ID instead, and explain in words what the full set includes.
 - ID 29 (3+1 set) has no dedicated photo for any colour — always [SHOW_ID:X] the matching 3 seater and explain it includes a matching chair.
 - Never re-send group photos after customer picked a specific sofa.
