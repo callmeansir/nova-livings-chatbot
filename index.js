@@ -129,6 +129,10 @@ const SOFAS_INDIVIDUAL = [
   { id: 33, name: 'Roma Grey 3+2+1 Set',  type: '3+2+1', colour: 'grey',  price: 750, image: `${G}/grey321.jpeg` },
   { id: 34, name: 'Roma Brown 3+2+1 Set', type: '3+2+1', colour: 'brown', price: 750, image: `${G}/brown321.jpeg` },
   { id: 35, name: 'Rio Cord Grey 3+2+1 Set', type: '3+2+1', colour: 'grey', price: 750, image: `${G}/rio321.jpeg` },
+  // Electric Corner Recliners — £699 (with LED lighting and USB ports)
+  { id: 36, name: 'Roma Black Electric Corner',    type: 'electriccorner', colour: 'black', price: 699, image: `${G}/blackecorner.jpeg` },
+  { id: 37, name: 'Roma Grey Electric Corner',     type: 'electriccorner', colour: 'grey',  price: 699, image: `${G}/greyecorner.jpeg` },
+  { id: 38, name: 'Sorrento Grey Electric Corner', type: 'electriccorner', colour: 'grey',  price: 699, image: `${G}/sorrentoecorner.jpeg` },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER, ...SOFAS_INDIVIDUAL];
@@ -368,10 +372,11 @@ PHOTO TRIGGERS:
 [SHOW_3SEATERS] = 5 individual 3 seater photos (IDs 11-15)
 [SHOW_2SEATERS] = 5 individual 2 seater photos (IDs 16-20)
 [SHOW_CHAIRS]   = 5 single chair photos (IDs 21-25)
-[SHOW_ID:X]     = single photo for sofa X (1-35)
+[SHOW_ELECTRIC] = 3 electric corner recliner photos (IDs 36-38)
+[SHOW_ID:X]     = single photo for sofa X (1-38)
 
 CRITICAL:
-- IDs 1-25 ALL have photos for every listed colour. ALWAYS use [SHOW_ID:X]. NEVER say photo unavailable.
+- IDs 1-25 and 36-38 ALL have photos for every listed colour. ALWAYS use [SHOW_ID:X]. NEVER say photo unavailable.
 - IDs 26-35 have dedicated photos ONLY for the specific colours shown in MULTI-PIECE SETS. For those colours use [SHOW_ID:X] with that ID. For other colours, use [SHOW_ID:X] with the matching 3 seater or 2 seater ID instead, and explain in words what the full set includes.
 - ID 29 (3+1 set) has no dedicated photo for any colour — always [SHOW_ID:X] the matching 3 seater and explain it includes a matching chair.
 - Never re-send group photos after customer picked a specific sofa.
