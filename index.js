@@ -126,6 +126,9 @@ const SOFAS_INDIVIDUAL = [
   { id: 30, name: 'Roma Black 2+1+1 Set', type: '2+1+1', colour: 'black', price: 650, image: `${G}/romablack2_1_1.jpeg` },
   { id: 31, name: 'Roma Black 3+1+1 Set', type: '3+1+1', colour: 'black', price: 700, image: `${G}/ROMABLACK3_1_1.jpeg` },
   { id: 32, name: 'Roma Black 3+2+1 Set', type: '3+2+1', colour: 'black', price: 750, image: `${G}/romablack3_2_1.jpeg` },
+  { id: 33, name: 'Roma Grey 3+2+1 Set',  type: '3+2+1', colour: 'grey',  price: 750, image: `${G}/grey321.jpeg` },
+  { id: 34, name: 'Roma Brown 3+2+1 Set', type: '3+2+1', colour: 'brown', price: 750, image: `${G}/brown321.jpeg` },
+  { id: 35, name: 'Rio Cord Grey 3+2+1 Set', type: '3+2+1', colour: 'grey', price: 750, image: `${G}/rio321.jpeg` },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER, ...SOFAS_INDIVIDUAL];
@@ -259,7 +262,10 @@ MULTI-PIECE SETS — these are matching sets sold together, slightly discounted 
 
 3+2+1 SET (3 seater + 2 seater + chair, all matching) — £750:
 - Roma Black 3+2+1 (ID 32) — HAS PHOTO
-- Other colours — no dedicated photo, show matching 3 seater photo and explain the full set includes a 2 seater and chair too
+- Roma Grey 3+2+1 (ID 33) — HAS PHOTO
+- Roma Brown 3+2+1 (ID 34) — HAS PHOTO
+- Rio Cord Grey 3+2+1 (ID 35) — HAS PHOTO
+- Sorrento Grey — no dedicated photo, show matching 3 seater photo and explain the full set includes a 2 seater and chair too
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 HOW TO HANDLE MULTI-PIECE SET REQUESTS:
@@ -362,11 +368,11 @@ PHOTO TRIGGERS:
 [SHOW_3SEATERS] = 5 individual 3 seater photos (IDs 11-15)
 [SHOW_2SEATERS] = 5 individual 2 seater photos (IDs 16-20)
 [SHOW_CHAIRS]   = 5 single chair photos (IDs 21-25)
-[SHOW_ID:X]     = single photo for sofa X (1-32)
+[SHOW_ID:X]     = single photo for sofa X (1-35)
 
 CRITICAL:
 - IDs 1-25 ALL have photos for every listed colour. ALWAYS use [SHOW_ID:X]. NEVER say photo unavailable.
-- IDs 26, 27, 28, 30, 31, 32 have a dedicated photo ONLY for the specific colour shown in MULTI-PIECE SETS (mostly Roma Grey/Black). For that colour use [SHOW_ID:X] with that ID. For other colours, use [SHOW_ID:X] with the matching 3 seater or 2 seater ID instead, and explain in words what the full set includes.
+- IDs 26-35 have dedicated photos ONLY for the specific colours shown in MULTI-PIECE SETS. For those colours use [SHOW_ID:X] with that ID. For other colours, use [SHOW_ID:X] with the matching 3 seater or 2 seater ID instead, and explain in words what the full set includes.
 - ID 29 (3+1 set) has no dedicated photo for any colour — always [SHOW_ID:X] the matching 3 seater and explain it includes a matching chair.
 - Never re-send group photos after customer picked a specific sofa.
 - Always say YES to any delivery date.
