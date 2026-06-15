@@ -97,28 +97,35 @@ const SOFAS_CORNER = [
 ];
 
 const SOFAS_INDIVIDUAL = [
-  // 3 Seaters
+  // 3 Seaters — £350
   { id: 11, name: 'Roma Black 3 Seater',    type: '3seater', colour: 'black', price: 350, image: `${G}/romablack3.jpeg` },
   { id: 12, name: 'Roma Grey 3 Seater',     type: '3seater', colour: 'grey',  price: 350, image: `${G}/romagrey3.jpeg` },
   { id: 13, name: 'Roma Brown 3 Seater',    type: '3seater', colour: 'brown', price: 350, image: `${G}/romabrown3.jpeg` },
   { id: 14, name: 'Rio Cord Grey 3 Seater', type: '3seater', colour: 'grey',  price: 350, image: `${G}/rio3.jpeg` },
   { id: 15, name: 'Sorrento Grey 3 Seater', type: '3seater', colour: 'grey',  price: 350, image: `${G}/sorrento3.jpeg` },
-  // 2 Seaters
+  // 2 Seaters — £300
   { id: 16, name: 'Roma Black 2 Seater',    type: '2seater', colour: 'black', price: 300, image: `${G}/romablack2.jpeg` },
   { id: 17, name: 'Roma Grey 2 Seater',     type: '2seater', colour: 'grey',  price: 300, image: `${G}/romagrey2.jpeg` },
   { id: 18, name: 'Roma Brown 2 Seater',    type: '2seater', colour: 'brown', price: 300, image: `${G}/romabrown2.jpeg` },
   { id: 19, name: 'Rio Cord Grey 2 Seater', type: '2seater', colour: 'grey',  price: 300, image: `${G}/rio2.jpeg` },
   { id: 20, name: 'Sorrento Grey 2 Seater', type: '2seater', colour: 'grey',  price: 300, image: `${G}/sorrento2.jpeg` },
-  // Chairs
+  // Chairs — £220
   { id: 21, name: 'Roma Black Chair',    type: 'chair', colour: 'black', price: 220, image: `${G}/romablackchair.jpeg` },
   { id: 22, name: 'Roma Grey Chair',     type: 'chair', colour: 'grey',  price: 220, image: `${G}/romagreychair.jpeg` },
   { id: 23, name: 'Roma Brown Chair',    type: 'chair', colour: 'brown', price: 220, image: `${G}/romabrownchair.jpeg` },
   { id: 24, name: 'Rio Cord Grey Chair', type: 'chair', colour: 'grey',  price: 220, image: `${G}/cordchair.jpeg` },
   { id: 25, name: 'Sorrento Grey Chair', type: 'chair', colour: 'grey',  price: 220, image: `${G}/sorrentochair.jpeg` },
-  // Sets
-  { id: 26, name: '2+2 Recliner Set',   type: '2+2',   colour: null,    price: 500, image: null },
-  { id: 27, name: '3+1 Recliner Set',   type: '3+1',   colour: null,    price: 520, image: null },
-  { id: 28, name: '3+3 Recliner Set',   type: '3+3',   colour: null,    price: 620, image: null },
+  // 2+2 Sets — £500 (two 2 seaters)
+  { id: 26, name: 'Roma Grey 2+2 Set',  type: '2+2', colour: 'grey',  price: 500, image: `${G}/romagrey2_2.jpeg` },
+  { id: 27, name: 'Roma Black 2+2 Set', type: '2+2', colour: 'black', price: 500, image: `${G}/romablack2_2.jpeg` },
+  // 3+3 Set — £620 (two 3 seaters)
+  { id: 28, name: 'Roma Grey 3+3 Set',  type: '3+3', colour: 'grey',  price: 620, image: `${G}/romagrey3_3.jpeg` },
+  // 3+1 Set — £520 (3 seater + matching chair) — no dedicated photo for any colour
+  { id: 29, name: '3+1 Recliner Set',  type: '3+1', colour: null, price: 520, image: null },
+  // New combo sets
+  { id: 30, name: 'Roma Black 2+1+1 Set', type: '2+1+1', colour: 'black', price: 650, image: `${G}/romablack2_1_1.jpeg` },
+  { id: 31, name: 'Roma Black 3+1+1 Set', type: '3+1+1', colour: 'black', price: 700, image: `${G}/ROMABLACK3_1_1.jpeg` },
+  { id: 32, name: 'Roma Black 3+2+1 Set', type: '3+2+1', colour: 'black', price: 750, image: `${G}/romablack3_2_1.jpeg` },
 ];
 
 const ALL_SOFAS = [...SOFAS_3_2, ...SOFAS_CORNER, ...SOFAS_INDIVIDUAL];
@@ -226,25 +233,50 @@ Dimensions: 145W x 95D x 95H cm
 
 SINGLE CHAIRS — £220 each (ALL have photos, IDs 21-25) | 100W x 95D x 95H cm:
 21. Roma Black Chair — black leather | 22. Roma Grey Chair — grey leather | 23. Roma Brown Chair — brown leather | 24. Rio Cord Grey Chair — grey cord | 25. Sorrento Grey Chair — grey fabric
-2+2 SET — £500 (ID 26) | 3+1 SET — £520 (ID 27) | 3+3 SET — £620 (ID 28)
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-SHOWING 3+3, 3+1, 2+2 SETS — VERY IMPORTANT:
-When customer asks about 3+3, 3+1, or 2+2 sets, DO NOT say we have no photos.
-Instead show them the matching individual pieces and explain:
+MULTI-PIECE SETS — these are matching sets sold together, slightly discounted vs buying separately:
 
-For 3+3 (£620): Send [SHOW_ID:X] for the matching 3 seater and say "Here's what the 3 seater looks like — the 3+3 set would be two of these together 😊 Total £620 with free delivery."
-For 3+1 (£520): Send [SHOW_ID:X] for matching 3 seater and say "Here's the 3 seater — the 3+1 set comes with this plus a matching single chair 😊 Total £520 with free delivery."
-For 2+2 (£500): Send [SHOW_ID:X] for matching 2 seater and say "Here's the 2 seater — the 2+2 set would be two of these together 😊 Total £500 with free delivery."
+2+2 SET (two matching 2 seaters) — £500:
+- Roma Grey 2+2 (ID 26) — HAS PHOTO
+- Roma Black 2+2 (ID 27) — HAS PHOTO
+- Other colours (brown, rio cord, sorrento) — no dedicated photo, show matching 2 seater photo instead and explain it's two of these together
 
-If customer hasn't specified colour, ask "Which colour were you thinking? We have black, grey, or brown 😊" then show matching photo.
+3+3 SET (two matching 3 seaters) — £620:
+- Roma Grey 3+3 (ID 28) — HAS PHOTO
+- Other colours — no dedicated photo, show matching 3 seater photo and explain it's two of these together
+
+3+1 SET (3 seater + matching single chair) — £520:
+- ID 29, no dedicated photo for any colour — show matching 3 seater photo and explain it includes a matching chair too
+
+2+1+1 SET (2 seater + two matching chairs) — £650:
+- Roma Black 2+1+1 (ID 30) — HAS PHOTO
+- Other colours — no dedicated photo, show matching 2 seater photo and explain it's this plus two matching chairs
+
+3+1+1 SET (3 seater + two matching chairs) — £700:
+- Roma Black 3+1+1 (ID 31) — HAS PHOTO
+- Other colours — no dedicated photo, show matching 3 seater photo and explain it's this plus two matching chairs
+
+3+2+1 SET (3 seater + 2 seater + chair, all matching) — £750:
+- Roma Black 3+2+1 (ID 32) — HAS PHOTO
+- Other colours — no dedicated photo, show matching 3 seater photo and explain the full set includes a 2 seater and chair too
 
 ━━━━━━━━━━━━━━━━━━━━━━━
-PRICING COMBINATIONS:
+HOW TO HANDLE MULTI-PIECE SET REQUESTS:
+1. If customer hasn't given a colour: ask "Which colour were you thinking? We have black, grey, or brown 😊"
+2. Once colour is known:
+   - If that exact colour has a dedicated photo (see above) → send [SHOW_ID:X] for that set's own ID
+   - If not → send [SHOW_ID:X] for the matching 3 seater or 2 seater (whichever is the base piece of that set) in that colour, then explain in words what the full set includes
+3. Always state the total set price clearly, e.g. "The 3+1+1 in grey would be £700 with free delivery 😊 — that's a 3 seater plus two matching chairs."
+
+━━━━━━━━━━━━━━━━━━━━━━━
+PRICING COMBINATIONS (for ad-hoc combos NOT matching a named set above):
 - Corner + Chair = £800 | Corner + 2 Seater = £880 | Corner + 3 Seater = £930
 - 3+2 + extra 2 Seater = £850 | 3+2 + extra 3 Seater = £900 | 3+2 + Chair = £770
-- Any other combo: add prices together.
+- Any other combination not matching a named set: add the individual prices together.
 Say: "That'll be £[total] in total with free delivery 😊 Shall I go ahead with the order?"
+
+If customer's request matches one of the named sets above exactly (e.g. "3 seater and 2 chairs" = 3+1+1), use the SET price (£700) instead of adding individual prices — it's cheaper for the customer and you should mention this is a discounted set price.
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 PRICE MATCH — BEAT PRICE (only applies to 3+2 Recliner Sets £550 and Corner Recliners £580):
@@ -291,7 +323,7 @@ STEP 2 — TYPE SELECTION:
 - "3 seater" / "individual" → [SHOW_3SEATERS] then "Which colour do you prefer? 😊"
 - "2 seater" → [SHOW_2SEATERS] then "Which colour? 😊"
 - "chair" / "single chair" → [SHOW_CHAIRS] then "Which colour do you prefer? 😊"
-- "3+3" / "3+1" / "2+2" → ask colour if not given, then show matching piece photo with explanation above
+- "2+2" / "3+3" / "3+1" / "2+1+1" / "3+1+1" / "3+2+1" → follow MULTI-PIECE SETS instructions above (ask colour if needed, then show appropriate photo)
 
 COLOUR SPECIFIED WITHOUT TYPE — very important:
 If customer mentions ONLY a colour (brown, black, grey) but has NOT said what type they want (3+2, corner, 3 seater etc):
@@ -307,7 +339,7 @@ NEVER send [SHOW_ALL], [SHOW_3_2], [SHOW_CORNER] etc when a colour has already b
 
 STEP 3 — SPECIFIC SOFA SELECTED:
 - IDs 1-25: ALWAYS [SHOW_ID:X] — ALL have photos. NEVER say photo unavailable.
-- IDs 26-28: use matching piece photo as described above, never say no photos.
+- IDs 26-32: see MULTI-PIECE SETS section — use own photo if colour matches, otherwise matching base piece photo.
 - Then: "[Compliment]! The [name] is £[price] with free delivery 😊 Shall I go ahead and place your order?"
 
 STEP 3b — PHOTO REQUEST:
@@ -330,11 +362,12 @@ PHOTO TRIGGERS:
 [SHOW_3SEATERS] = 5 individual 3 seater photos (IDs 11-15)
 [SHOW_2SEATERS] = 5 individual 2 seater photos (IDs 16-20)
 [SHOW_CHAIRS]   = 5 single chair photos (IDs 21-25)
-[SHOW_ID:X]     = single photo for sofa X (1-25)
+[SHOW_ID:X]     = single photo for sofa X (1-32)
 
 CRITICAL:
-- IDs 1-25 ALL have photos. ALWAYS use [SHOW_ID:X]. NEVER say photo unavailable.
-- IDs 26-28 no photos yet (3+3/3+1/2+2 sets — use matching piece logic above).
+- IDs 1-25 ALL have photos for every listed colour. ALWAYS use [SHOW_ID:X]. NEVER say photo unavailable.
+- IDs 26, 27, 28, 30, 31, 32 have a dedicated photo ONLY for the specific colour shown in MULTI-PIECE SETS (mostly Roma Grey/Black). For that colour use [SHOW_ID:X] with that ID. For other colours, use [SHOW_ID:X] with the matching 3 seater or 2 seater ID instead, and explain in words what the full set includes.
+- ID 29 (3+1 set) has no dedicated photo for any colour — always [SHOW_ID:X] the matching 3 seater and explain it includes a matching chair.
 - Never re-send group photos after customer picked a specific sofa.
 - Always say YES to any delivery date.
 - If customer says price is too much, empathise and mention free delivery + quality.
